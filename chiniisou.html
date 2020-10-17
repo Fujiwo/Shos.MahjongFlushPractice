@@ -26,11 +26,6 @@
             document.write("Last updated on " + document.lastModified + ".")
         </script>
     </p>
-        <!--
-        Mahjong - Wikipedia https://en.wikipedia.org/wiki/Mahjong
-        Japanese Mahjong yaku - Wikipedia https://en.wikipedia.org/wiki/Japanese_Mahjong_yaku
-        The Rules of Mah Jong or Mah Jongg https://www.mastersofgames.com/rules/mah-jong-rules.htm
-     -->
     <h2 id="title"></h2>
 
     <table class="table">
@@ -84,7 +79,23 @@
                 </th>
             </tr>
             <tr>
-                <th colspan="2"><input id="nextButton" type="button"></th>
+                <th><input id="nextButton" type="button"></th>
+                <th>
+                    <div id="answerChecks">
+                        <span id="answerPanel"></span>:
+                        <input id="answerCheck1" name="answerCheck" type="checkbox" class="checkbox">1
+                        <input id="answerCheck2" name="answerCheck" type="checkbox">2
+                        <input id="answerCheck3" name="answerCheck" type="checkbox">3
+                        <input id="answerCheck4" name="answerCheck" type="checkbox">4
+                        <input id="answerCheck5" name="answerCheck" type="checkbox">5
+                        <input id="answerCheck6" name="answerCheck" type="checkbox">6
+                        <input id="answerCheck7" name="answerCheck" type="checkbox">7
+                        <input id="answerCheck8" name="answerCheck" type="checkbox">8
+                        <input id="answerCheck9" name="answerCheck" type="checkbox">9
+                        <input id="answerChecksClear" type="button">
+                        (<span id="winsNumberLabel"></span>: <span id="winsNumber"></span>/<span id="questionNumber"></span>)
+                    </div>
+                </th>
             </tr>
         </thead>
         <tbody>

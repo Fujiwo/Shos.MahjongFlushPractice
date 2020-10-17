@@ -166,7 +166,6 @@ namespace Chiniisou {
             return true;
         }
         
-        // [麻雀]簡単なあがり判定法 - Qiita https://qiita.com/tomohxx/items/20d886d1991ab89f5522
         private static maybeCompleteHand(hand: number[]): boolean {
             var a = hand[0];
             var b = hand[1];
@@ -191,7 +190,7 @@ namespace Chiniisou {
             for (var i = 0; i < 9; i++)
                 p += i * hand[i];
         
-            for (var i = p * 2 % 3; i < 9; i+=3) {//ここでiを、牌の和を3で割った余りを2で割った数に初期化
+            for (var i = p * 2 % 3; i < 9; i+=3) {
                 hand[i] -= 2;
         
                 if (hand[i] >= 0) {
@@ -344,11 +343,13 @@ namespace Chiniisou {
     }
 
     export class Application {
-        model: Model = new Model();
-        view : View  = new View();
+        model         : Model    = new Model();
+        view          : View     = new View();
 
-        isQuestion    : boolean = true;
+        isQuestion    : boolean  = true;
         readyToWinHand: number[] = [];
+        questionNumber: number   = 0;
+        winsNumber    : number   = 0;
 
         private get qustionText(): string {
             return this.view.isJapanese ? '聴牌' : 'Ready to win hand';
@@ -406,7 +407,11 @@ namespace Chiniisou {
             $('#nextButton').on('click', () => {
                 this.isQuestion ? this.setQuestion()
                                 : this.setAnswer  ();
-                this.updateNextButton();
+                this.updateQandA();
+            });
+
+            $('#answerChecksClear').on('click', () => {
+                this.clearAnswerChecks();
             });
         }
 
@@ -425,11 +430,30 @@ namespace Chiniisou {
             this.isQuestion = true;
         }
 
+        private clearAnswerChecks(): void {
+            $('input[name="answerCheck"]').prop('checked', false);
+        }
+
+        private updateQandA(): void {
+            this.updateNextButton();
+            this.updateAnswerChecks();
+            this.updateNumbers();
+        }
+
         private updateNextButton(): void {
             if (this.view.isJapanese)
                 $('#nextButton').val(this.isQuestion ? '次の問題' : '待ちを表示');
             else
                 $('#nextButton').val(this.isQuestion ? 'Next' : 'Show winning tiles');
+        }
+
+        private updateAnswerChecks(): void {
+            $('#answerChecks').attr('visibility', this.isQuestion ? 'hidden' : 'visible');
+        }
+
+        private updateNumbers(): void {
+            $('#winsNumber'    ).text(String(this.winsNumber    ));
+            $('#questionNumber').text(String(this.questionNumber));
         }
 
         private updateLanguage(): void {
@@ -453,6 +477,10 @@ namespace Chiniisou {
                 $('#sortingLabel').html('理牌');
                 $('label[for="sortingSorted"]').text('あり');
                 $('label[for="sortingUnsorted"]').text('なし');
+
+                $('#answerChecksClear').val('クリア');
+                $('#winsNumberLabel').html('正解数');
+                $('#answerPanel').html('あなたの解答');
             } else {
                 $('#title').html("Mahjong Flush Practice | Sho's Software");
 
@@ -473,8 +501,12 @@ namespace Chiniisou {
                 $('#sortingLabel').html('Sorting');
                 $('label[for="sortingSorted"]').text('Sorted');
                 $('label[for="sortingUnsorted"]').text('Unsorted');
+
+                $('#answerChecksClear').val('Clear');
+                $('#winsNumberLabel').html('Correct Answers');
+                $('#answerPanel').html('Your Answer');
             }
-            this.updateNextButton();
+            this.updateQandA();
         }
    }
 }
