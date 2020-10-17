@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -37,14 +37,25 @@
         <thead>
             <tr>
                 <th>
+                    <span id="languageLabel"></span>:
+                </th>
+                <th>
+                    <input id="languageEnglish" type="radio" name="language" value="english" checked>
+                    <label for="languageEnglish"></label>
+                    <input id="languageJapanese" type="radio" name="language" value="japanese">
+                    <label for="languageJapanese"></label>
+                </th>
+            </tr>
+            <tr>
+                <th>
                     <span id="usingTileLabel"></span>:
                 </th>
                 <th>
                     <input id="usingTileCharacters" type="radio" name="usingTile" value="characters" checked>
                     <label for="usingTileCharacters"></label>
-                    <input id="usingTileDots"type="radio" name="usingTile" value="dots">
+                    <input id="usingTileDots" type="radio" name="usingTile" value="dots">
                     <label for="usingTileDots"></label>
-                    <input id="usingTileBomboos"type="radio" name="usingTile" value="bomboo">
+                    <input id="usingTileBomboos" type="radio" name="usingTile" value="bomboo">
                     <label for="usingTileBomboos"></label>
                 </th>
             </tr>
@@ -63,17 +74,6 @@
             </tr>
             <tr>
                 <th>
-                    <span id="languageLabel"></span>:
-                </th>
-                <th>
-                    <input id="languageEnglish" type="radio" name="language" value="english" checked>
-                    <label for="languageEnglish"></label>
-                    <input id="languageJapanese" type="radio" name="language" value="japanese">
-                    <label for="languageJapanese"></label>
-                </th>
-            </tr>
-            <tr>
-                <th>
                     <span id="sortingLabel">Sorting</span>:
                 </th>
                 <th>
@@ -84,7 +84,7 @@
                 </th>
             </tr>
             <tr>
-                <th colspan="2"><input id="nextButton"  type="button"></th>
+                <th colspan="2"><input id="nextButton" type="button"></th>
             </tr>
         </thead>
         <tbody>
