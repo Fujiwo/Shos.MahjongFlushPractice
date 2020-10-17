@@ -1,7 +1,9 @@
 # Shos.MahjongFlushPractice
 
+
 ## Sample Page
 * [Mahjong Flush Practice | Sho's Software](https://www.shos.info/doc/chiniisou.html "Mahjong Flush Practice | Sho's Software")
+![Screenshot](screenshot.png "Screenshot")
 
 ## Author Info
 
