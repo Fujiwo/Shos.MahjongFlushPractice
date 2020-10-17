@@ -446,6 +446,7 @@ namespace Chiniisou {
             const usersAnswerHandIndexes = this.getHandIndexes();
             if (Helper.arrayEquals(usersAnswerHandIndexes, correctHandIndexes))
                 this.winsNumber++;
+            this.questionNumber++;
             this.updateNumbers();
         }
 
@@ -467,7 +468,12 @@ namespace Chiniisou {
         }
 
         private updateAnswerChecks(): void {
-            this.isQuestion ? $('#answerChecks').hide() : $('#answerChecks').show();
+            if (this.isQuestion) {
+                $('#answerChecks').hide();
+            } else {
+                this.clearAnswerChecks();
+                $('#answerChecks').show();
+            }
         }
 
         private getHandIndexes(): number[] {

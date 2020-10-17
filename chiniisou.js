@@ -449,6 +449,7 @@ var Chiniisou;
             var usersAnswerHandIndexes = this.getHandIndexes();
             if (Helper.arrayEquals(usersAnswerHandIndexes, correctHandIndexes))
                 this.winsNumber++;
+            this.questionNumber++;
             this.updateNumbers();
         };
         Application.prototype.clearAnswerChecks = function () {
@@ -466,7 +467,13 @@ var Chiniisou;
                 $('#nextButton').val(this.isQuestion ? 'Next' : 'Show winning tiles');
         };
         Application.prototype.updateAnswerChecks = function () {
-            this.isQuestion ? $('#answerChecks').hide() : $('#answerChecks').show();
+            if (this.isQuestion) {
+                $('#answerChecks').hide();
+            }
+            else {
+                this.clearAnswerChecks();
+                $('#answerChecks').show();
+            }
         };
         Application.prototype.getHandIndexes = function () {
             var handIndexes = [];
