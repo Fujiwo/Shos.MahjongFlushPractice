@@ -20,11 +20,11 @@ h2:before {
     z-index: -2
 }
 .small-tile {
-    font-size: 200%;
-}
-.medium-tile {
     font-size: 300%;
 }
-.large-tile {
+.medium-tile {
     font-size: 400%;
+}
+.large-tile {
+    font-size: 500%;
 }
