@@ -26,6 +26,16 @@ namespace Chiniisou {
             return array[Helper.getRandomIndex(array.length)];
         }
 
+        public static arrayEquals<TElement>(array1: TElement[], array2: TElement[]): boolean {
+            if (array1.length != array2.length)
+                return false;
+            for (var index = 0; index < array1.length; index++) {
+                if (array1[index] !== array2[index])
+                    return false;
+            }
+            return true;
+        }
+
         public static shuffle<TElement>(array: TElement[]): void {
             for (var count = array.length; count > 1; count--)
                 Helper.shuffleTail(array, count);
@@ -427,7 +437,16 @@ namespace Chiniisou {
             const handIndexes = Model.makeComplateHandIndexes(this.readyToWinHand);
             $("#hands").append('<div>' + this.answerText + ':</div>');
             this.view.appendHandIndexesTo($("#hands"), handIndexes);
+
             this.isQuestion = true;
+            this.judge(handIndexes);
+        }
+
+        private judge(correctHandIndexes: number[]) {
+            const usersAnswerHandIndexes = this.getHandIndexes();
+            if (Helper.arrayEquals(usersAnswerHandIndexes, correctHandIndexes))
+                this.winsNumber++;
+            this.updateNumbers();
         }
 
         private clearAnswerChecks(): void {
@@ -448,7 +467,16 @@ namespace Chiniisou {
         }
 
         private updateAnswerChecks(): void {
-            $('#answerChecks').attr('visibility', this.isQuestion ? 'hidden' : 'visible');
+            this.isQuestion ? $('#answerChecks').hide() : $('#answerChecks').show();
+        }
+
+        private getHandIndexes(): number[] {
+            var handIndexes: number[] = [];
+            for (var handIndex = 0; handIndex < 9; handIndex++) {
+                if ($('#answerCheck' + String(handIndex + 1)).prop('checked'))
+                    handIndexes.push(handIndex);
+            }
+            return handIndexes;
         }
 
         private updateNumbers(): void {

@@ -26,6 +26,15 @@ var Chiniisou;
         Helper.getRandomElement = function (array) {
             return array[Helper.getRandomIndex(array.length)];
         };
+        Helper.arrayEquals = function (array1, array2) {
+            if (array1.length != array2.length)
+                return false;
+            for (var index = 0; index < array1.length; index++) {
+                if (array1[index] !== array2[index])
+                    return false;
+            }
+            return true;
+        };
         Helper.shuffle = function (array) {
             for (var count = array.length; count > 1; count--)
                 Helper.shuffleTail(array, count);
@@ -434,6 +443,13 @@ var Chiniisou;
             $("#hands").append('<div>' + this.answerText + ':</div>');
             this.view.appendHandIndexesTo($("#hands"), handIndexes);
             this.isQuestion = true;
+            this.judge(handIndexes);
+        };
+        Application.prototype.judge = function (correctHandIndexes) {
+            var usersAnswerHandIndexes = this.getHandIndexes();
+            if (Helper.arrayEquals(usersAnswerHandIndexes, correctHandIndexes))
+                this.winsNumber++;
+            this.updateNumbers();
         };
         Application.prototype.clearAnswerChecks = function () {
             $('input[name="answerCheck"]').prop('checked', false);
@@ -450,7 +466,15 @@ var Chiniisou;
                 $('#nextButton').val(this.isQuestion ? 'Next' : 'Show winning tiles');
         };
         Application.prototype.updateAnswerChecks = function () {
-            $('#answerChecks').attr('visibility', this.isQuestion ? 'hidden' : 'visible');
+            this.isQuestion ? $('#answerChecks').hide() : $('#answerChecks').show();
+        };
+        Application.prototype.getHandIndexes = function () {
+            var handIndexes = [];
+            for (var handIndex = 0; handIndex < 9; handIndex++) {
+                if ($('#answerCheck' + String(handIndex + 1)).prop('checked'))
+                    handIndexes.push(handIndex);
+            }
+            return handIndexes;
         };
         Application.prototype.updateNumbers = function () {
             $('#winsNumber').text(String(this.winsNumber));
