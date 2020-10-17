@@ -27,7 +27,126 @@
     </p>
     <h2 id="title"></h2>
 
-    <table class="table">
+    <div class="container">
+        <form>
+            <div class="form-group row">
+                <label id="languageLabel" class="col-sm-2 col-form-label"></label>
+                <div class="col-sm-10">
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="languageEnglish" type="radio" name="language" value="english" checked>
+                        <label class="form-check-label" for="languageEnglish"></label>
+                    </div>
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="languageJapanese" type="radio" name="language" value="japanese">
+                        <label class="form-check-label" for="languageJapanese"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label id="usingTileLabel" class="col-sm-2 col-form-label"></label>
+                <div class="col-sm-10">
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="usingTileCharacters" type="radio" name="usingTile" value="characters" checked>
+                        <label class="form-check-label" for="usingTileCharacters"></label>
+                    </div>
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="usingTileDots" type="radio" name="usingTile" value="dots">
+                        <label class="form-check-label" for="usingTileDots"></label>
+                    </div>
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="usingTileBomboos" type="radio" name="usingTile" value="bomboos">
+                        <label class="form-check-label" for="usingTileBomboos"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label id="tileSizeLabel" class="col-sm-2 col-form-label"></label>
+                <div class="col-sm-10">
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="tileSizeSmall" type="radio" name="tileSize" value="small">
+                        <label class="form-check-label" for="tileSizeSmall"></label>
+                    </div>
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="tileSizeMedium" type="radio" name="tileSize" value="medium" checked>
+                        <label class="form-check-label" for="tileSizeMedium"></label>
+                    </div>
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="tileSizeLarge" type="radio" name="tileSize" value="large">
+                        <label class="form-check-label" for="tileSizeLarge"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label id="sortingLabel" class="col-sm-2 col-form-label"></label>
+                <div class="col-sm-10">
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="sortingSorted" type="radio" name="sorting" value="sorted" checked>
+                        <label class="form-check-label" for="sortingSorted"></label>
+                    </div>
+                    <div class="form-check  form-check-inline">
+                        <input class="form-check-input" id="sortingUnsorted" type="radio" name="sorting" value="unsorted">
+                        <label class="form-check-label" for="sortingUnsorted"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label" id="answerPanel"></label>
+                <div class="col-sm-10">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="answerCheck1" name="answerCheck">
+                        <label class="form-check-label" for="answerCheck1">1</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="answerCheck2" name="answerCheck">
+                        <label class="form-check-label" for="answerCheck2">2</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="answerCheck3" name="answerCheck">
+                        <label class="form-check-label" for="answerCheck3">3</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="answerCheck4" name="answerCheck">
+                        <label class="form-check-label" for="answerCheck4">4</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="answerCheck5" name="answerCheck">
+                        <label class="form-check-label" for="answerCheck5">5</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="answerCheck6" name="answerCheck">
+                        <label class="form-check-label" for="answerCheck6">6</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="answerCheck7" name="answerCheck">
+                        <label class="form-check-label" for="answerCheck7">7</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="answerCheck8" name="answerCheck">
+                        <label class="form-check-label" for="answerCheck8">8</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="answerCheck9" name="answerCheck">
+                        <label class="form-check-label" for="answerCheck9">9</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input id="answerChecksClear" type="button" class="btn btn-secondary btn-sm">
+                    </div>
+                    <div class="form-check form-check-inline">
+                        (<span id="winsNumberLabel"></span>: <span id="winsNumber"></span>/<span id="questionNumber"></span>)
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <input id="nextButton" type="button" class="btn btn-primary btn-lg">
+            </div>
+            <div class="form-group row">
+                <div id="hands"></div>
+            </div>
+        </form>
+    </div>
+
+<!-- 
+    <table class="table table-sm">
         <thead>
             <tr>
                 <th>
@@ -49,7 +168,7 @@
                     <label for="usingTileCharacters"></label>
                     <input id="usingTileDots" type="radio" name="usingTile" value="dots">
                     <label for="usingTileDots"></label>
-                    <input id="usingTileBomboos" type="radio" name="usingTile" value="bomboo">
+                    <input id="usingTileBomboos" type="radio" name="usingTile" value="bomboos">
                     <label for="usingTileBomboos"></label>
                 </th>
             </tr>
@@ -102,14 +221,14 @@
                 <td colspan="2"><div id="hands"></div></td>
             </tr>
         </tbody>
-    </table>
+    </table> -->
 
     <img src="../css/image/line.jpg" width="100%" height="1" alt="LINE">
     <h3>Source Code</h3>
     <div>
-    <ul>
-        <li><a href="https://github.com/Fujiwo/Shos.MahjongFlushPractice">Fujiwo/Shos.MahjongFlushPractice | GitHub</a></li>
-    </ul>
+        <ul>
+            <li><a href="https://github.com/Fujiwo/Shos.MahjongFlushPractice">Fujiwo/Shos.MahjongFlushPractice | GitHub</a></li>
+        </ul>
     </div>
     <div id="footer">
         <img src="../css/image/line.jpg" width="100%" height="1" alt="LINE">

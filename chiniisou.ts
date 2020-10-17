@@ -451,6 +451,7 @@ namespace Chiniisou {
         }
 
         private clearAnswerChecks(): void {
+            console.log('clearAnswerChecks');
             $('input[name="answerCheck"]').prop('checked', false);
         }
 

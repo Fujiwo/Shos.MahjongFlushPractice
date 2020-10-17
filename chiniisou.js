@@ -453,6 +453,7 @@ var Chiniisou;
             this.updateNumbers();
         };
         Application.prototype.clearAnswerChecks = function () {
+            console.log('clearAnswerChecks');
             $('input[name="answerCheck"]').prop('checked', false);
         };
         Application.prototype.updateQandA = function () {
