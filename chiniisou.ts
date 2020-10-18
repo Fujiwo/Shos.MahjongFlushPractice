@@ -101,8 +101,8 @@ namespace Chiniisou {
         
         public constructor() {
             this.allHands      = Model.getAllHands();
-            console.log('allHands: ' + String(this.allHands.length));
-            console.log('allHands: ' + String(this.allHands));
+            // console.log('allHands: ' + String(this.allHands.length));
+            // console.log('allHands: ' + String(this.allHands));
             this.completeHands = Model.getCompleteHands(this.allHands);
         }
 
