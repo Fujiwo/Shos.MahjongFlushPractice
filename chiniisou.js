@@ -664,7 +664,7 @@ var Chiniisou;
                 $('#languageLabel').html('言語 (Language)');
                 $('label[for="languageEnglish"]').text('英語 (English)');
                 $('label[for="languageJapanese"]').text('日本語 (Japanese)');
-                $('#fontOrImageLabel').html('牌の描画方法 (表示がおかしくなるときは「画像」を推奨)');
+                $('#fontOrImageLabel').html('牌の描画方法 (表示がおかしいときは「画像」を選択)');
                 $('label[for="fontOrImageFont"]').text('フォント');
                 $('label[for="fontOrImageImage"]').text('画像');
                 $('#sortingLabel').html('理牌');
@@ -672,14 +672,14 @@ var Chiniisou;
                 $('label[for="sortingUnsorted"]').text('なし');
                 $('#answerChecksClear').val('クリア');
                 $('#winsNumberLabel').html('正解数');
-                $('#answerPanel').html('あなたの解答');
+                $('#answerPanel').html('何待ち?');
             }
             else {
                 $('#title').html("Mahjong Flush Practice | Sho's Software");
                 $('#languageLabel').html('Language (言語)');
                 $('label[for="languageEnglish"]').text('English (英語)');
                 $('label[for="languageJapanese"]').text('Japanese (日本語)');
-                $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, "Images" is recommended)');
+                $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, choose "Images.")');
                 $('label[for="fontOrImageFont"]').text('Font');
                 $('label[for="fontOrImageImage"]').text('Images');
                 $('#usingTileLabel').html('Tiles');
@@ -695,7 +695,7 @@ var Chiniisou;
                 $('label[for="sortingUnsorted"]').text('Unsorted');
                 $('#answerChecksClear').val('Clear');
                 $('#winsNumberLabel').html('Correct Answers');
-                $('#answerPanel').html('Your Answer');
+                $('#answerPanel').html('Winning tiles?');
             }
             this.updateQandA();
         };
