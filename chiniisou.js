@@ -453,7 +453,6 @@ var Chiniisou;
             this.updateNumbers();
         };
         Application.prototype.clearAnswerChecks = function () {
-            console.log('clearAnswerChecks');
             $('input[name="answerCheck"]').prop('checked', false);
         };
         Application.prototype.updateQandA = function () {
@@ -469,11 +468,13 @@ var Chiniisou;
         };
         Application.prototype.updateAnswerChecks = function () {
             if (this.isQuestion) {
-                $('#answerChecks').hide();
+                $('input[name="answerCheck"]').prop('disabled', true);
+                $('#answerChecksClear').prop('disabled', true);
             }
             else {
                 this.clearAnswerChecks();
-                $('#answerChecks').show();
+                $('input[name="answerCheck"]').prop('disabled', false);
+                $('#answerChecksClear').prop('disabled', false);
             }
         };
         Application.prototype.getHandIndexes = function () {

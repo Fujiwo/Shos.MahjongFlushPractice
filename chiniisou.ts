@@ -427,14 +427,17 @@ namespace Chiniisou {
 
         private setQuestion(): void {
             this.readyToWinHand = this.model.getNewReadyToWinHand();
+
             $("#hands").html("");
             $("#hands").append('<div>' + this.qustionText + ':</div>');
             this.view.appendHandTo($("#hands"), this.readyToWinHand);
+
             this.isQuestion = false;
         }
 
         private setAnswer(): void {
             const handIndexes = Model.makeComplateHandIndexes(this.readyToWinHand);
+
             $("#hands").append('<div>' + this.answerText + ':</div>');
             this.view.appendHandIndexesTo($("#hands"), handIndexes);
 
@@ -451,7 +454,6 @@ namespace Chiniisou {
         }
 
         private clearAnswerChecks(): void {
-            console.log('clearAnswerChecks');
             $('input[name="answerCheck"]').prop('checked', false);
         }
 
@@ -470,10 +472,12 @@ namespace Chiniisou {
 
         private updateAnswerChecks(): void {
             if (this.isQuestion) {
-                $('#answerChecks').hide();
+                $('input[name="answerCheck"]').prop('disabled', true);
+                $('#answerChecksClear'       ).prop('disabled', true);
             } else {
                 this.clearAnswerChecks();
-                $('#answerChecks').show();
+                $('input[name="answerCheck"]').prop('disabled', false);
+                $('#answerChecksClear'       ).prop('disabled', false);
             }
         }
 
