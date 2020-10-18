@@ -1,5 +1,4 @@
 "use strict";
-/// <reference path="./typings/jquery/jQuery.d.ts"
 var Chiniisou;
 (function (Chiniisou) {
     var Suit;
@@ -312,13 +311,6 @@ var Chiniisou;
             enumerable: true,
             configurable: true
         });
-        // private handIndexToHtml(handIndex: number): JQuery<HTMLElement> {
-        //     let div = $('<div>');
-        //     div.addClass(this.tileStyle);
-        //     const tileText = this.toTileText(handIndex);
-        //     div.append($('<span>').html(tileText));
-        //     return div;
-        // }
         View.prototype.handIndexesToHtml = function (handIndexes) {
             var _this = this;
             var div = $('<div>');
@@ -348,7 +340,7 @@ var Chiniisou;
         };
         View.prototype.toImageHtml = function (handIndex) {
             console.log(this.getFontImageFileName(handIndex));
-            var rate;
+            var rate = 1.00;
             switch (this.tileSize) {
                 case TileSize.Small:
                     rate = 0.75;
@@ -574,7 +566,7 @@ var Chiniisou;
                 $('#languageLabel').html('Language (言語)');
                 $('label[for="languageEnglish"]').text('English (英語)');
                 $('label[for="languageJapanese"]').text('Japanese (日本語)');
-                $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, "Image" is recommended)');
+                $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, "Images" is recommended)');
                 $('label[for="fontOrImageFont"]').text('Font');
                 $('label[for="fontOrImageImage"]').text('Images');
                 $('#usingTileLabel').html('Tiles');

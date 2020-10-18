@@ -1,5 +1,3 @@
-/// <reference path="./typings/jquery/jQuery.d.ts"
-
 namespace Chiniisou {
     enum Suit {
         Characters,
@@ -321,14 +319,6 @@ namespace Chiniisou {
             }
         }
 
-        // private handIndexToHtml(handIndex: number): JQuery<HTMLElement> {
-        //     let div = $('<div>');
-        //     div.addClass(this.tileStyle);
-        //     const tileText = this.toTileText(handIndex);
-        //     div.append($('<span>').html(tileText));
-        //     return div;
-        // }
-
         private handIndexesToHtml(handIndexes: number[]): JQuery<HTMLElement> {
             let div = $('<div>');
             div.addClass(this.tileStyle);
@@ -361,7 +351,7 @@ namespace Chiniisou {
 
         private toImageHtml(handIndex: number): JQuery<HTMLElement> {
             console.log(this.getFontImageFileName(handIndex));
-            var rate: number;
+            var rate = 1.00;
             switch (this.tileSize) {
                 case TileSize.Small : rate = 0.75; break;
                 case TileSize.Medium: rate = 1.00; break;
@@ -574,7 +564,7 @@ namespace Chiniisou {
                 $('label[for="languageEnglish"]').text('English (英語)');
                 $('label[for="languageJapanese"]').text('Japanese (日本語)');
 
-                $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, "Image" is recommended)');
+                $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, "Images" is recommended)');
                 $('label[for="fontOrImageFont"]').text('Font');
                 $('label[for="fontOrImageImage"]').text('Images');
 
