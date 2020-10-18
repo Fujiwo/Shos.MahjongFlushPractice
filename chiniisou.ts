@@ -254,10 +254,25 @@ namespace Chiniisou {
         private static readonly bambooTileTexts     = [ '&#x1f010;', '&#x1f011;', '&#x1f012;', '&#x1f013;', '&#x1f014;',  '&#x1f015;',  '&#x1f016;',  '&#x1f017;',  '&#x1f018;'];
         private static readonly dotsTileTexts       = [ '&#x1f019;', '&#x1f01a;', '&#x1f01b;', '&#x1f01c;', '&#x1f01d;',  '&#x1f01e;',  '&#x1f01f;',  '&#x1f020;',  '&#x1f021;'];
 
-        private _suit: Suit = Suit.Characters;
-        private _tileSize: TileSize = TileSize.Medium;
         private _isJapanese : boolean = View.isFromJapan();
-        private _isSorted : boolean = true;
+        private _fontOrImage: boolean = true;
+        private _suit       : Suit = Suit.Characters;
+        private _tileSize   : TileSize = TileSize.Medium;
+        private _isSorted   : boolean = true;
+
+        public get isJapanese(): boolean {
+            return this._isJapanese;
+        }
+        public set isJapanese(value: boolean) {
+            this._isJapanese = value;
+        }
+
+        public get fontOrImage(): boolean {
+            return this._fontOrImage;
+        }
+        public set fontOrImage(value: boolean) {
+            this._fontOrImage = value;
+        }
 
         public get suit(): Suit {
             return this._suit;
@@ -271,13 +286,6 @@ namespace Chiniisou {
         }
         public set tileSize(value: TileSize) {
             this._tileSize = value;
-        }
-
-        public get isJapanese(): boolean {
-            return this._isJapanese;
-        }
-        public set isJapanese(value: boolean) {
-            this._isJapanese = value;
         }
 
         public get isSorted(): boolean {
@@ -296,7 +304,7 @@ namespace Chiniisou {
         }
 
         appendHandTo(element: JQuery<HTMLElement>, hand: number[]): void {
-            const div = this.isSorted ? this.toTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
+            const div = this.isSorted ? this.handToTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
             element.append(div);
         }
         
@@ -304,7 +312,7 @@ namespace Chiniisou {
             const div = this.handIndexesToHtml(handIndexes);
             element.append(div);
         }
-                
+
         private get tileTexts(): string[] {
             switch (this.suit) {
                 case Suit.Bomboos: return View.bambooTileTexts    ;
@@ -313,42 +321,69 @@ namespace Chiniisou {
             }
         }
 
+        // private handIndexToHtml(handIndex: number): JQuery<HTMLElement> {
+        //     let div = $('<div>');
+        //     div.addClass(this.tileStyle);
+        //     const tileText = this.toTileText(handIndex);
+        //     div.append($('<span>').html(tileText));
+        //     return div;
+        // }
+
         private handIndexesToHtml(handIndexes: number[]): JQuery<HTMLElement> {
             let div = $('<div>');
             div.addClass(this.tileStyle);
-            handIndexes.forEach(handIndex => {
-                const tileText = this.toTileText(handIndex);
-                div.append($('<span>').html(tileText));
-            });
+            handIndexes.forEach(handIndex => div.append(this.handIndexToHtml(handIndex)));
             return div;
         }
 
-        private handIndexToHtml(handIndex: number): JQuery<HTMLElement> {
-            let div = $('<div>');
-            div.addClass(this.tileStyle);
-            const tileText = this.toTileText(handIndex);
-            div.append($('<span>').html(tileText));
-            return div;
-        }
-
-        private toTileHtml(hand: number[]): JQuery<HTMLElement> {
+        private handToTileHtml(hand: number[]): JQuery<HTMLElement> {
             let div = $('<div>');
             div.addClass(this.tileStyle);
             hand.forEach((tileNumber, handIndex, self) => {
-                const tileText = this.toTileText(handIndex);
                 for (var count = 0; count < tileNumber; count++)
-                    div.append($('<span>').html(tileText));
+                    div.append(this.handIndexToHtml(handIndex));
             });
             return div;
-        }
-        
-        private toTileText(handIndex: number): string {
-            return this.tileTexts[handIndex];
         }
 
         private static isFromJapan(): boolean {
             let language: string | null = (window.navigator.languages && window.navigator.languages[0]) || window.navigator.language;
             return language != null && language.substr(0, 2) === 'ja';
+        }
+        
+        private handIndexToHtml(handIndex: number): JQuery<HTMLElement> {
+            return this.fontOrImage ? this.toFontHtml(handIndex) : this.toImageHtml(handIndex)
+        }
+
+        private toFontHtml(handIndex: number): JQuery<HTMLElement> {
+            return $('<span>').html(this.tileTexts[handIndex]);
+        }
+
+        private toImageHtml(handIndex: number): JQuery<HTMLElement> {
+            console.log(this.getFontImageFileName(handIndex));
+            var rate: number;
+            switch (this.tileSize) {
+                case TileSize.Small : rate = 0.75; break;
+                case TileSize.Medium: rate = 1.00; break;
+                case TileSize.Large : rate = 1.50; break;
+            }
+
+            const width  = 47;
+            const height = 63;
+
+            return $('<img >').attr('src'   , this.getFontImageFileName(handIndex))
+                              .attr('width' , Math.floor(width  * rate)           )
+                              .attr('height', Math.floor(height * rate)           );
+        }
+
+        private getFontImageFileName(handIndex: number): string {
+            var fileName = 'images/p_';
+            switch (this.suit) {
+                case Suit.Characters: fileName += 'm'; break;
+                case Suit.Dots      : fileName += 'p'; break;
+                case Suit.Bomboos   : fileName += 's'; break;
+            }
+            return fileName + 's' + String(handIndex + 1) + '_1.gif';
         }
     }
 
@@ -379,6 +414,23 @@ namespace Chiniisou {
         }
         
         private setHandlers(): void {
+            $('input:radio[name="language"]').change(() => {
+                const value = $('input:radio[name="language"]:checked').val();
+                switch (value) {
+                    case "japanese": this.view.isJapanese = true ; break;
+                    case "english" : this.view.isJapanese = false; break;
+                }
+                this.updateLanguage();
+            });
+
+            $('input:radio[name="fontOrImage"]').change(() => {
+                const value = $('input:radio[name="fontOrImage"]:checked').val();
+                switch (value) {
+                    case "font" : this.view.fontOrImage = true ; break;
+                    case "image": this.view.fontOrImage = false; break;
+                }
+            });
+
             $('input:radio[name="usingTile"]').change(() => {
                 const value = $('input:radio[name="usingTile"]:checked').val();
                 switch (value) {
@@ -395,15 +447,6 @@ namespace Chiniisou {
                     case "medium": this.view.tileSize = TileSize.Medium; break;
                     case "large" : this.view.tileSize = TileSize.Large ; break;
                 }
-            });
-
-            $('input:radio[name="language"]').change(() => {
-                const value = $('input:radio[name="language"]:checked').val();
-                switch (value) {
-                    case "japanese": this.view.isJapanese = true ; break;
-                    case "english" : this.view.isJapanese = false; break;
-                }
-                this.updateLanguage();
             });
 
             $('input:radio[name="sorting"]').change(() => {
@@ -513,6 +556,10 @@ namespace Chiniisou {
                 $('label[for="languageEnglish"]').text('英語 (English)');
                 $('label[for="languageJapanese"]').text('日本語 (Japanese)');
 
+                $('#fontOrImageLabel').html('牌の描画方法 (表示がおかしくなるときは「画像」を推奨)');
+                $('label[for="fontOrImageFont"]').text('フォント');
+                $('label[for="fontOrImageImage"]').text('画像');
+
                 $('#sortingLabel').html('理牌');
                 $('label[for="sortingSorted"]').text('あり');
                 $('label[for="sortingUnsorted"]').text('なし');
@@ -523,6 +570,14 @@ namespace Chiniisou {
             } else {
                 $('#title').html("Mahjong Flush Practice | Sho's Software");
 
+                $('#languageLabel').html('Language (言語)');
+                $('label[for="languageEnglish"]').text('English (英語)');
+                $('label[for="languageJapanese"]').text('Japanese (日本語)');
+
+                $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, "Image" is recommended)');
+                $('label[for="fontOrImageFont"]').text('Font');
+                $('label[for="fontOrImageImage"]').text('Images');
+
                 $('#usingTileLabel').html('Tiles');
                 $('label[for="usingTileCharacters"]').text('Characters');
                 $('label[for="usingTileDots"]').text('Dots');
@@ -532,10 +587,6 @@ namespace Chiniisou {
                 $('label[for="tileSizeSmall"]').text('Small');
                 $('label[for="tileSizeMedium"]').text('Medium');
                 $('label[for="tileSizeLarge"]').text('Large');
-
-                $('#languageLabel').html('Language (言語)');
-                $('label[for="languageEnglish"]').text('English (英語)');
-                $('label[for="languageJapanese"]').text('Japanese (日本語)');
 
                 $('#sortingLabel').html('Sorting');
                 $('label[for="sortingSorted"]').text('Sorted');

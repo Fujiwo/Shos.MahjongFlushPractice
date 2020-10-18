@@ -226,11 +226,32 @@ var Chiniisou;
     }());
     var View = /** @class */ (function () {
         function View() {
+            this._isJapanese = View.isFromJapan();
+            this._fontOrImage = true;
             this._suit = Suit.Characters;
             this._tileSize = TileSize.Medium;
-            this._isJapanese = View.isFromJapan();
             this._isSorted = true;
         }
+        Object.defineProperty(View.prototype, "isJapanese", {
+            get: function () {
+                return this._isJapanese;
+            },
+            set: function (value) {
+                this._isJapanese = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(View.prototype, "fontOrImage", {
+            get: function () {
+                return this._fontOrImage;
+            },
+            set: function (value) {
+                this._fontOrImage = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Object.defineProperty(View.prototype, "suit", {
             get: function () {
                 return this._suit;
@@ -247,16 +268,6 @@ var Chiniisou;
             },
             set: function (value) {
                 this._tileSize = value;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(View.prototype, "isJapanese", {
-            get: function () {
-                return this._isJapanese;
-            },
-            set: function (value) {
-                this._isJapanese = value;
             },
             enumerable: true,
             configurable: true
@@ -283,7 +294,7 @@ var Chiniisou;
             configurable: true
         });
         View.prototype.appendHandTo = function (element, hand) {
-            var div = this.isSorted ? this.toTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
+            var div = this.isSorted ? this.handToTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
             element.append(div);
         };
         View.prototype.appendHandIndexesTo = function (element, handIndexes) {
@@ -301,40 +312,74 @@ var Chiniisou;
             enumerable: true,
             configurable: true
         });
+        // private handIndexToHtml(handIndex: number): JQuery<HTMLElement> {
+        //     let div = $('<div>');
+        //     div.addClass(this.tileStyle);
+        //     const tileText = this.toTileText(handIndex);
+        //     div.append($('<span>').html(tileText));
+        //     return div;
+        // }
         View.prototype.handIndexesToHtml = function (handIndexes) {
             var _this = this;
             var div = $('<div>');
             div.addClass(this.tileStyle);
-            handIndexes.forEach(function (handIndex) {
-                var tileText = _this.toTileText(handIndex);
-                div.append($('<span>').html(tileText));
-            });
+            handIndexes.forEach(function (handIndex) { return div.append(_this.handIndexToHtml(handIndex)); });
             return div;
         };
-        View.prototype.handIndexToHtml = function (handIndex) {
-            var div = $('<div>');
-            div.addClass(this.tileStyle);
-            var tileText = this.toTileText(handIndex);
-            div.append($('<span>').html(tileText));
-            return div;
-        };
-        View.prototype.toTileHtml = function (hand) {
+        View.prototype.handToTileHtml = function (hand) {
             var _this = this;
             var div = $('<div>');
             div.addClass(this.tileStyle);
             hand.forEach(function (tileNumber, handIndex, self) {
-                var tileText = _this.toTileText(handIndex);
                 for (var count = 0; count < tileNumber; count++)
-                    div.append($('<span>').html(tileText));
+                    div.append(_this.handIndexToHtml(handIndex));
             });
             return div;
-        };
-        View.prototype.toTileText = function (handIndex) {
-            return this.tileTexts[handIndex];
         };
         View.isFromJapan = function () {
             var language = (window.navigator.languages && window.navigator.languages[0]) || window.navigator.language;
             return language != null && language.substr(0, 2) === 'ja';
+        };
+        View.prototype.handIndexToHtml = function (handIndex) {
+            return this.fontOrImage ? this.toFontHtml(handIndex) : this.toImageHtml(handIndex);
+        };
+        View.prototype.toFontHtml = function (handIndex) {
+            return $('<span>').html(this.tileTexts[handIndex]);
+        };
+        View.prototype.toImageHtml = function (handIndex) {
+            console.log(this.getFontImageFileName(handIndex));
+            var rate;
+            switch (this.tileSize) {
+                case TileSize.Small:
+                    rate = 0.75;
+                    break;
+                case TileSize.Medium:
+                    rate = 1.00;
+                    break;
+                case TileSize.Large:
+                    rate = 1.50;
+                    break;
+            }
+            var width = 47;
+            var height = 63;
+            return $('<img >').attr('src', this.getFontImageFileName(handIndex))
+                .attr('width', Math.floor(width * rate))
+                .attr('height', Math.floor(height * rate));
+        };
+        View.prototype.getFontImageFileName = function (handIndex) {
+            var fileName = 'images/p_';
+            switch (this.suit) {
+                case Suit.Characters:
+                    fileName += 'm';
+                    break;
+                case Suit.Dots:
+                    fileName += 'p';
+                    break;
+                case Suit.Bomboos:
+                    fileName += 's';
+                    break;
+            }
+            return fileName + 's' + String(handIndex + 1) + '_1.gif';
         };
         View.charactersTileTexts = ['&#x1f007;', '&#x1f008;', '&#x1f009;', '&#x1f00a;', '&#x1f00b;', '&#x1f00c;', '&#x1f00d;', '&#x1f00e;', '&#x1f00f;'];
         View.bambooTileTexts = ['&#x1f010;', '&#x1f011;', '&#x1f012;', '&#x1f013;', '&#x1f014;', '&#x1f015;', '&#x1f016;', '&#x1f017;', '&#x1f018;'];
@@ -371,6 +416,29 @@ var Chiniisou;
         });
         Application.prototype.setHandlers = function () {
             var _this = this;
+            $('input:radio[name="language"]').change(function () {
+                var value = $('input:radio[name="language"]:checked').val();
+                switch (value) {
+                    case "japanese":
+                        _this.view.isJapanese = true;
+                        break;
+                    case "english":
+                        _this.view.isJapanese = false;
+                        break;
+                }
+                _this.updateLanguage();
+            });
+            $('input:radio[name="fontOrImage"]').change(function () {
+                var value = $('input:radio[name="fontOrImage"]:checked').val();
+                switch (value) {
+                    case "font":
+                        _this.view.fontOrImage = true;
+                        break;
+                    case "image":
+                        _this.view.fontOrImage = false;
+                        break;
+                }
+            });
             $('input:radio[name="usingTile"]').change(function () {
                 var value = $('input:radio[name="usingTile"]:checked').val();
                 switch (value) {
@@ -398,18 +466,6 @@ var Chiniisou;
                         _this.view.tileSize = TileSize.Large;
                         break;
                 }
-            });
-            $('input:radio[name="language"]').change(function () {
-                var value = $('input:radio[name="language"]:checked').val();
-                switch (value) {
-                    case "japanese":
-                        _this.view.isJapanese = true;
-                        break;
-                    case "english":
-                        _this.view.isJapanese = false;
-                        break;
-                }
-                _this.updateLanguage();
             });
             $('input:radio[name="sorting"]').change(function () {
                 var value = $('input:radio[name="sorting"]:checked').val();
@@ -503,6 +559,9 @@ var Chiniisou;
                 $('#languageLabel').html('言語 (Language)');
                 $('label[for="languageEnglish"]').text('英語 (English)');
                 $('label[for="languageJapanese"]').text('日本語 (Japanese)');
+                $('#fontOrImageLabel').html('牌の描画方法 (表示がおかしくなるときは「画像」を推奨)');
+                $('label[for="fontOrImageFont"]').text('フォント');
+                $('label[for="fontOrImageImage"]').text('画像');
                 $('#sortingLabel').html('理牌');
                 $('label[for="sortingSorted"]').text('あり');
                 $('label[for="sortingUnsorted"]').text('なし');
@@ -512,6 +571,12 @@ var Chiniisou;
             }
             else {
                 $('#title').html("Mahjong Flush Practice | Sho's Software");
+                $('#languageLabel').html('Language (言語)');
+                $('label[for="languageEnglish"]').text('English (英語)');
+                $('label[for="languageJapanese"]').text('Japanese (日本語)');
+                $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, "Image" is recommended)');
+                $('label[for="fontOrImageFont"]').text('Font');
+                $('label[for="fontOrImageImage"]').text('Images');
                 $('#usingTileLabel').html('Tiles');
                 $('label[for="usingTileCharacters"]').text('Characters');
                 $('label[for="usingTileDots"]').text('Dots');
@@ -520,9 +585,6 @@ var Chiniisou;
                 $('label[for="tileSizeSmall"]').text('Small');
                 $('label[for="tileSizeMedium"]').text('Medium');
                 $('label[for="tileSizeLarge"]').text('Large');
-                $('#languageLabel').html('Language (言語)');
-                $('label[for="languageEnglish"]').text('English (英語)');
-                $('label[for="languageJapanese"]').text('Japanese (日本語)');
                 $('#sortingLabel').html('Sorting');
                 $('label[for="sortingSorted"]').text('Sorted');
                 $('label[for="sortingUnsorted"]').text('Unsorted');
