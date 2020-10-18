@@ -16,6 +16,43 @@ var Chiniisou;
     var Helper = /** @class */ (function () {
         function Helper() {
         }
+        Helper.isFromJapan = function () {
+            var language = (window.navigator.languages && window.navigator.languages[0]) || window.navigator.language;
+            return language != null && language.substr(0, 2) === 'ja';
+        };
+        Helper.save = function (key, data) {
+            if (typeof window.localStorage !== 'undefined') {
+                // console.log('Helper.save()');
+                // console.log(data);
+                // console.log(JSON.stringify(data));
+                window.localStorage.setItem(key, JSON.stringify(data));
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        Helper.load = function (key) {
+            if (typeof window.localStorage !== 'undefined') {
+                var json = window.localStorage.getItem(key);
+                // console.log('Helper.load()');
+                // console.log(json);
+                // if (json != null)
+                //     console.log(JSON.parse(json));
+                return json == null ? null : JSON.parse(json);
+            }
+            else {
+                return null;
+            }
+        };
+        // public static removeFromStorage(key: string): boolean {
+        //     if (typeof window.localStorage !== 'undefined') {
+        //         window.localStorage.removeItem(key);
+        //         return true;
+        //     } else {
+        //         return false;
+        //     }
+        // }
         Helper.getRandomNumber = function (minimum, maximum) {
             return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
         };
@@ -223,67 +260,122 @@ var Chiniisou;
         Model.completeHandsNumber = 14;
         return Model;
     }());
-    var View = /** @class */ (function () {
-        function View() {
-            this._isJapanese = View.isFromJapan();
+    var ViewSettings = /** @class */ (function () {
+        function ViewSettings() {
+            this._isJapanese = Helper.isFromJapan();
             this._fontOrImage = true;
             this._suit = Suit.Characters;
             this._tileSize = TileSize.Medium;
             this._isSorted = true;
         }
-        Object.defineProperty(View.prototype, "isJapanese", {
+        Object.defineProperty(ViewSettings.prototype, "isJapanese", {
             get: function () {
                 return this._isJapanese;
             },
             set: function (value) {
-                this._isJapanese = value;
+                if (value != this._isJapanese) {
+                    this._isJapanese = value;
+                    this.save();
+                }
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(View.prototype, "fontOrImage", {
+        Object.defineProperty(ViewSettings.prototype, "fontOrImage", {
             get: function () {
                 return this._fontOrImage;
             },
             set: function (value) {
-                this._fontOrImage = value;
+                if (value != this._fontOrImage) {
+                    this._fontOrImage = value;
+                    this.save();
+                }
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(View.prototype, "suit", {
+        Object.defineProperty(ViewSettings.prototype, "suit", {
             get: function () {
                 return this._suit;
             },
             set: function (value) {
-                this._suit = value;
+                if (value != this._suit) {
+                    this._suit = value;
+                    this.save();
+                }
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(View.prototype, "tileSize", {
+        Object.defineProperty(ViewSettings.prototype, "tileSize", {
             get: function () {
                 return this._tileSize;
             },
             set: function (value) {
-                this._tileSize = value;
+                if (value != this._tileSize) {
+                    this._tileSize = value;
+                    this.save();
+                }
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(View.prototype, "isSorted", {
+        Object.defineProperty(ViewSettings.prototype, "isSorted", {
             get: function () {
                 return this._isSorted;
             },
             set: function (value) {
-                this._isSorted = value;
+                if (value != this._isSorted) {
+                    this._isSorted = value;
+                    this.save();
+                }
             },
             enumerable: true,
             configurable: true
         });
+        // public constructor() {
+        //     //Helper.removeFromStorage(ViewSettings.dataKey);
+        // }
+        ViewSettings.prototype.load = function () {
+            var loadedData = Helper.load(ViewSettings.dataKey);
+            if (loadedData == null)
+                return false;
+            this._isJapanese = loadedData._isJapanese;
+            this._fontOrImage = loadedData._fontOrImage;
+            this._suit = loadedData._suit;
+            this._tileSize = loadedData._tileSize;
+            this._isSorted = loadedData._isSorted;
+            return true;
+        };
+        ViewSettings.prototype.save = function () {
+            return Helper.save(ViewSettings.dataKey, this);
+        };
+        ViewSettings.dataKey = 'ShosChiniisouViewSettings';
+        return ViewSettings;
+    }());
+    var View = /** @class */ (function () {
+        function View() {
+            this.settings_ = new ViewSettings();
+            this.settings.load();
+        }
+        Object.defineProperty(View.prototype, "settings", {
+            get: function () {
+                return this.settings_;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        View.prototype.appendHandTo = function (element, hand) {
+            var div = this.settings.isSorted ? this.handToTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
+            element.append(div);
+        };
+        View.prototype.appendHandIndexesTo = function (element, handIndexes) {
+            var div = this.handIndexesToHtml(handIndexes);
+            element.append(div);
+        };
         Object.defineProperty(View.prototype, "tileStyle", {
             get: function () {
-                switch (this.tileSize) {
+                switch (this.settings.tileSize) {
                     case TileSize.Small: return "small-tile";
                     case TileSize.Medium: return "medium-tile";
                     case TileSize.Large: return "large-tile";
@@ -292,17 +384,9 @@ var Chiniisou;
             enumerable: true,
             configurable: true
         });
-        View.prototype.appendHandTo = function (element, hand) {
-            var div = this.isSorted ? this.handToTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
-            element.append(div);
-        };
-        View.prototype.appendHandIndexesTo = function (element, handIndexes) {
-            var div = this.handIndexesToHtml(handIndexes);
-            element.append(div);
-        };
         Object.defineProperty(View.prototype, "tileTexts", {
             get: function () {
-                switch (this.suit) {
+                switch (this.settings.suit) {
                     case Suit.Bomboos: return View.bambooTileTexts;
                     case Suit.Dots: return View.dotsTileTexts;
                     default: return View.charactersTileTexts;
@@ -328,20 +412,15 @@ var Chiniisou;
             });
             return div;
         };
-        View.isFromJapan = function () {
-            var language = (window.navigator.languages && window.navigator.languages[0]) || window.navigator.language;
-            return language != null && language.substr(0, 2) === 'ja';
-        };
         View.prototype.handIndexToHtml = function (handIndex) {
-            return this.fontOrImage ? this.toFontHtml(handIndex) : this.toImageHtml(handIndex);
+            return this.settings.fontOrImage ? this.toFontHtml(handIndex) : this.toImageHtml(handIndex);
         };
         View.prototype.toFontHtml = function (handIndex) {
             return $('<span>').html(this.tileTexts[handIndex]);
         };
         View.prototype.toImageHtml = function (handIndex) {
-            console.log(this.getFontImageFileName(handIndex));
             var rate = 1.00;
-            switch (this.tileSize) {
+            switch (this.settings.tileSize) {
                 case TileSize.Small:
                     rate = 0.75;
                     break;
@@ -360,7 +439,7 @@ var Chiniisou;
         };
         View.prototype.getFontImageFileName = function (handIndex) {
             var fileName = 'images/p_';
-            switch (this.suit) {
+            switch (this.settings.suit) {
                 case Suit.Characters:
                     fileName += 'm';
                     break;
@@ -386,36 +465,70 @@ var Chiniisou;
             this.readyToWinHand = [];
             this.questionNumber = 0;
             this.winsNumber = 0;
+            this.initializeControls();
             this.setHandlers();
             this.setQuestion();
-            this.view.isJapanese ? $('input:radio[name="language"]').val(['japanese'])
+            this.view.settings.isJapanese ? $('input:radio[name="language"]').val(['japanese'])
                 : $('input:radio[name="language"]').val(['english']);
             this.updateLanguage();
         }
         Object.defineProperty(Application.prototype, "qustionText", {
             get: function () {
-                return this.view.isJapanese ? '聴牌' : 'Ready to win hand';
+                return this.view.settings.isJapanese ? '聴牌' : 'Ready to win hand';
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(Application.prototype, "answerText", {
             get: function () {
-                return this.view.isJapanese ? '待ち' : 'Winning tiles';
+                return this.view.settings.isJapanese ? '待ち' : 'Winning tiles';
             },
             enumerable: true,
             configurable: true
         });
+        Application.prototype.initializeControls = function () {
+            $('input:radio[name="language"]').val([this.view.settings.isJapanese ? "japanese" : "english"]);
+            $('input:radio[name="fontOrImage"]').val([this.view.settings.fontOrImage ? "font" : "image"]);
+            var suitValue = "";
+            switch (this.view.settings.suit) {
+                case Suit.Characters:
+                    suitValue = "characters";
+                    break;
+                case Suit.Dots:
+                    suitValue = "dots";
+                    break;
+                case Suit.Bomboos:
+                    suitValue = "bomboos";
+                    break;
+            }
+            //console.log("suitValue: " + suitValue);
+            $('input:radio[name="usingTile"]').val([suitValue]);
+            var tileSizeValue = "";
+            switch (this.view.settings.tileSize) {
+                case TileSize.Small:
+                    tileSizeValue = "small";
+                    break;
+                case TileSize.Medium:
+                    tileSizeValue = "medium";
+                    break;
+                case TileSize.Large:
+                    tileSizeValue = "large";
+                    break;
+            }
+            //console.log("tileSizeValue: " + tileSizeValue);
+            $('input:radio[name="tileSize"]').val([tileSizeValue]);
+            $('input:radio[name="sorting"]').val([this.view.settings.isSorted ? "sorted" : "unsorted"]);
+        };
         Application.prototype.setHandlers = function () {
             var _this = this;
             $('input:radio[name="language"]').change(function () {
                 var value = $('input:radio[name="language"]:checked').val();
                 switch (value) {
                     case "japanese":
-                        _this.view.isJapanese = true;
+                        _this.view.settings.isJapanese = true;
                         break;
                     case "english":
-                        _this.view.isJapanese = false;
+                        _this.view.settings.isJapanese = false;
                         break;
                 }
                 _this.updateLanguage();
@@ -424,10 +537,10 @@ var Chiniisou;
                 var value = $('input:radio[name="fontOrImage"]:checked').val();
                 switch (value) {
                     case "font":
-                        _this.view.fontOrImage = true;
+                        _this.view.settings.fontOrImage = true;
                         break;
                     case "image":
-                        _this.view.fontOrImage = false;
+                        _this.view.settings.fontOrImage = false;
                         break;
                 }
             });
@@ -435,13 +548,13 @@ var Chiniisou;
                 var value = $('input:radio[name="usingTile"]:checked').val();
                 switch (value) {
                     case "characters":
-                        _this.view.suit = Suit.Characters;
+                        _this.view.settings.suit = Suit.Characters;
                         break;
                     case "dots":
-                        _this.view.suit = Suit.Dots;
+                        _this.view.settings.suit = Suit.Dots;
                         break;
                     case "bomboos":
-                        _this.view.suit = Suit.Bomboos;
+                        _this.view.settings.suit = Suit.Bomboos;
                         break;
                 }
             });
@@ -449,13 +562,13 @@ var Chiniisou;
                 var value = $('input:radio[name="tileSize"]:checked').val();
                 switch (value) {
                     case "small":
-                        _this.view.tileSize = TileSize.Small;
+                        _this.view.settings.tileSize = TileSize.Small;
                         break;
                     case "medium":
-                        _this.view.tileSize = TileSize.Medium;
+                        _this.view.settings.tileSize = TileSize.Medium;
                         break;
                     case "large":
-                        _this.view.tileSize = TileSize.Large;
+                        _this.view.settings.tileSize = TileSize.Large;
                         break;
                 }
             });
@@ -463,10 +576,10 @@ var Chiniisou;
                 var value = $('input:radio[name="sorting"]:checked').val();
                 switch (value) {
                     case "sorted":
-                        _this.view.isSorted = true;
+                        _this.view.settings.isSorted = true;
                         break;
                     case "unsorted":
-                        _this.view.isSorted = false;
+                        _this.view.settings.isSorted = false;
                         break;
                 }
             });
@@ -509,7 +622,7 @@ var Chiniisou;
             this.updateNumbers();
         };
         Application.prototype.updateNextButton = function () {
-            if (this.view.isJapanese)
+            if (this.view.settings.isJapanese)
                 $('#nextButton').val(this.isQuestion ? '次の問題' : '待ちを表示');
             else
                 $('#nextButton').val(this.isQuestion ? 'Next' : 'Show winning tiles');
@@ -538,7 +651,7 @@ var Chiniisou;
             $('#questionNumber').text(String(this.questionNumber));
         };
         Application.prototype.updateLanguage = function () {
-            if (this.view.isJapanese) {
+            if (this.view.settings.isJapanese) {
                 $('#title').html("麻雀 清一色の練習 | 翔ソフトウェア (Sho's)");
                 $('#usingTileLabel').html('牌');
                 $('label[for="usingTileCharacters"]').text('萬子');

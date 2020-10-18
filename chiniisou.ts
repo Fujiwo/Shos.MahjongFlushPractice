@@ -12,6 +12,45 @@ namespace Chiniisou {
     }
 
     class Helper {
+        public static isFromJapan(): boolean {
+            let language: string | null = (window.navigator.languages && window.navigator.languages[0]) || window.navigator.language;
+            return language != null && language.substr(0, 2) === 'ja';
+        }
+
+        public static save(key: string, data: any): boolean {
+            if (typeof window.localStorage !== 'undefined') {
+                // console.log('Helper.save()');
+                // console.log(data);
+                // console.log(JSON.stringify(data));
+                window.localStorage.setItem(key, JSON.stringify(data));
+                return true;
+            } else {
+                return false;
+            }
+        }
+            
+        public static load(key: string): any | null {
+            if (typeof window.localStorage !== 'undefined') {
+                const json = window.localStorage.getItem(key);
+                // console.log('Helper.load()');
+                // console.log(json);
+                // if (json != null)
+                //     console.log(JSON.parse(json));
+                return json == null ? null : JSON.parse(json);
+            } else {
+                return null;
+            }
+        }
+            
+        // public static removeFromStorage(key: string): boolean {
+        //     if (typeof window.localStorage !== 'undefined') {
+        //         window.localStorage.removeItem(key);
+        //         return true;
+        //     } else {
+        //         return false;
+        //     }
+        // }
+
         public static getRandomNumber(minimum: number, maximum: number): number {
             return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
         }
@@ -247,72 +286,121 @@ namespace Chiniisou {
         }
     }
 
-    class View {
-        private static readonly charactersTileTexts = [ '&#x1f007;', '&#x1f008;', '&#x1f009;', '&#x1f00a;', '&#x1f00b;',  '&#x1f00c;',  '&#x1f00d;',  '&#x1f00e;',  '&#x1f00f;'];
-        private static readonly bambooTileTexts     = [ '&#x1f010;', '&#x1f011;', '&#x1f012;', '&#x1f013;', '&#x1f014;',  '&#x1f015;',  '&#x1f016;',  '&#x1f017;',  '&#x1f018;'];
-        private static readonly dotsTileTexts       = [ '&#x1f019;', '&#x1f01a;', '&#x1f01b;', '&#x1f01c;', '&#x1f01d;',  '&#x1f01e;',  '&#x1f01f;',  '&#x1f020;',  '&#x1f021;'];
+    class ViewSettings {
+        private static readonly dataKey = 'ShosChiniisouViewSettings';
 
-        private _isJapanese : boolean = View.isFromJapan();
-        private _fontOrImage: boolean = true;
-        private _suit       : Suit = Suit.Characters;
+        private _isJapanese : boolean  = Helper.isFromJapan();
+        private _fontOrImage: boolean  = true;
+        private _suit       : Suit     = Suit.Characters;
         private _tileSize   : TileSize = TileSize.Medium;
-        private _isSorted   : boolean = true;
+        private _isSorted   : boolean  = true;
 
         public get isJapanese(): boolean {
             return this._isJapanese;
         }
         public set isJapanese(value: boolean) {
-            this._isJapanese = value;
+            if (value != this._isJapanese) {
+                this._isJapanese = value;
+                this.save();
+            }
         }
 
         public get fontOrImage(): boolean {
             return this._fontOrImage;
         }
         public set fontOrImage(value: boolean) {
-            this._fontOrImage = value;
+            if (value != this._fontOrImage) {
+                this._fontOrImage = value;
+                this.save();
+            }
         }
 
         public get suit(): Suit {
             return this._suit;
         }
         public set suit(value: Suit) {
-            this._suit = value;
+            if (value != this._suit) {
+                this._suit = value;
+                this.save();
+            }
         }
 
         public get tileSize(): TileSize {
             return this._tileSize;
         }
         public set tileSize(value: TileSize) {
-            this._tileSize = value;
+            if (value != this._tileSize) {
+                this._tileSize = value;
+                this.save();
+            }
         }
 
         public get isSorted(): boolean {
             return this._isSorted;
         }
         public set isSorted(value: boolean) {
-            this._isSorted = value;
+            if (value != this._isSorted) {
+                this._isSorted = value;
+                this.save();
+            }
+        }
+
+        // public constructor() {
+        //     //Helper.removeFromStorage(ViewSettings.dataKey);
+        // }
+
+        public load(): boolean {
+            const loadedData = Helper.load(ViewSettings.dataKey);
+            if (loadedData == null)
+                return false;
+            this._isJapanese  = loadedData._isJapanese ;
+            this._fontOrImage = loadedData._fontOrImage;
+            this._suit        = loadedData._suit       ;
+            this._tileSize    = loadedData._tileSize   ;
+            this._isSorted    = loadedData._isSorted   ;
+            return true;
+        }
+
+        private save(): boolean {
+            return Helper.save(ViewSettings.dataKey, this);
+        }
+    }
+
+    class View {
+        private static readonly charactersTileTexts = [ '&#x1f007;', '&#x1f008;', '&#x1f009;', '&#x1f00a;', '&#x1f00b;',  '&#x1f00c;',  '&#x1f00d;',  '&#x1f00e;',  '&#x1f00f;'];
+        private static readonly bambooTileTexts     = [ '&#x1f010;', '&#x1f011;', '&#x1f012;', '&#x1f013;', '&#x1f014;',  '&#x1f015;',  '&#x1f016;',  '&#x1f017;',  '&#x1f018;'];
+        private static readonly dotsTileTexts       = [ '&#x1f019;', '&#x1f01a;', '&#x1f01b;', '&#x1f01c;', '&#x1f01d;',  '&#x1f01e;',  '&#x1f01f;',  '&#x1f020;',  '&#x1f021;'];
+
+        private settings_: ViewSettings = new ViewSettings();
+
+        public get settings(): ViewSettings {
+            return this.settings_;
+        }
+
+        public constructor() {
+            this.settings.load();
+        }
+
+        public appendHandTo(element: JQuery<HTMLElement>, hand: number[]): void {
+            const div = this.settings.isSorted ? this.handToTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
+            element.append(div);
+        }
+        
+        public appendHandIndexesTo(element: JQuery<HTMLElement>, handIndexes: number[]): void {
+            const div = this.handIndexesToHtml(handIndexes);
+            element.append(div);
         }
 
         private get tileStyle(): string {
-            switch (this.tileSize) {
+            switch (this.settings.tileSize) {
                 case TileSize.Small : return "small-tile" ;
                 case TileSize.Medium: return "medium-tile";
                 case TileSize.Large : return "large-tile" ;
             }
         }
 
-        appendHandTo(element: JQuery<HTMLElement>, hand: number[]): void {
-            const div = this.isSorted ? this.handToTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
-            element.append(div);
-        }
-        
-        appendHandIndexesTo(element: JQuery<HTMLElement>, handIndexes: number[]): void {
-            const div = this.handIndexesToHtml(handIndexes);
-            element.append(div);
-        }
-
         private get tileTexts(): string[] {
-            switch (this.suit) {
+            switch (this.settings.suit) {
                 case Suit.Bomboos: return View.bambooTileTexts    ;
                 case Suit.Dots   : return View.dotsTileTexts      ;
                 default          : return View.charactersTileTexts;
@@ -335,14 +423,9 @@ namespace Chiniisou {
             });
             return div;
         }
-
-        private static isFromJapan(): boolean {
-            let language: string | null = (window.navigator.languages && window.navigator.languages[0]) || window.navigator.language;
-            return language != null && language.substr(0, 2) === 'ja';
-        }
         
         private handIndexToHtml(handIndex: number): JQuery<HTMLElement> {
-            return this.fontOrImage ? this.toFontHtml(handIndex) : this.toImageHtml(handIndex)
+            return this.settings.fontOrImage ? this.toFontHtml(handIndex) : this.toImageHtml(handIndex)
         }
 
         private toFontHtml(handIndex: number): JQuery<HTMLElement> {
@@ -350,9 +433,8 @@ namespace Chiniisou {
         }
 
         private toImageHtml(handIndex: number): JQuery<HTMLElement> {
-            console.log(this.getFontImageFileName(handIndex));
             var rate = 1.00;
-            switch (this.tileSize) {
+            switch (this.settings.tileSize) {
                 case TileSize.Small : rate = 0.75; break;
                 case TileSize.Medium: rate = 1.00; break;
                 case TileSize.Large : rate = 1.50; break;
@@ -368,7 +450,7 @@ namespace Chiniisou {
 
         private getFontImageFileName(handIndex: number): string {
             var fileName = 'images/p_';
-            switch (this.suit) {
+            switch (this.settings.suit) {
                 case Suit.Characters: fileName += 'm'; break;
                 case Suit.Dots      : fileName += 'p'; break;
                 case Suit.Bomboos   : fileName += 's'; break;
@@ -387,28 +469,55 @@ namespace Chiniisou {
         winsNumber    : number   = 0;
 
         private get qustionText(): string {
-            return this.view.isJapanese ? '聴牌' : 'Ready to win hand';
+            return this.view.settings.isJapanese ? '聴牌' : 'Ready to win hand';
         }
 
         private get answerText(): string {
-            return this.view.isJapanese ? '待ち' : 'Winning tiles';
+            return this.view.settings.isJapanese ? '待ち' : 'Winning tiles';
         }
 
         public constructor() {
+            this.initializeControls();
             this.setHandlers();
             this.setQuestion();
 
-            this.view.isJapanese ? $('input:radio[name="language"]').val(['japanese'])
-                                 : $('input:radio[name="language"]').val(['english' ]);
+            this.view.settings.isJapanese ? $('input:radio[name="language"]').val(['japanese'])
+                                          : $('input:radio[name="language"]').val(['english' ]);
             this.updateLanguage();
         }
-        
+
+        private initializeControls(): void {
+            $('input:radio[name="language"]').val([this.view.settings.isJapanese ? "japanese" : "english"]);
+
+            $('input:radio[name="fontOrImage"]').val([this.view.settings.fontOrImage ? "font" : "image"]);
+
+            var suitValue = "";
+            switch (this.view.settings.suit) {
+                case Suit.Characters: suitValue = "characters"; break;
+                case Suit.Dots      : suitValue = "dots"      ; break;
+                case Suit.Bomboos   : suitValue = "bomboos"   ; break;
+            }
+            //console.log("suitValue: " + suitValue);
+            $('input:radio[name="usingTile"]').val([suitValue]);
+
+            var tileSizeValue = "";
+            switch (this.view.settings.tileSize) {
+                case TileSize.Small : tileSizeValue = "small" ; break;
+                case TileSize.Medium: tileSizeValue = "medium"; break;
+                case TileSize.Large : tileSizeValue = "large" ; break;
+            }
+            //console.log("tileSizeValue: " + tileSizeValue);
+            $('input:radio[name="tileSize"]').val([tileSizeValue]);
+
+            $('input:radio[name="sorting"]').val([this.view.settings.isSorted ? "sorted" : "unsorted"]);
+        }
+
         private setHandlers(): void {
             $('input:radio[name="language"]').change(() => {
                 const value = $('input:radio[name="language"]:checked').val();
                 switch (value) {
-                    case "japanese": this.view.isJapanese = true ; break;
-                    case "english" : this.view.isJapanese = false; break;
+                    case "japanese": this.view.settings.isJapanese = true ; break;
+                    case "english" : this.view.settings.isJapanese = false; break;
                 }
                 this.updateLanguage();
             });
@@ -416,34 +525,34 @@ namespace Chiniisou {
             $('input:radio[name="fontOrImage"]').change(() => {
                 const value = $('input:radio[name="fontOrImage"]:checked').val();
                 switch (value) {
-                    case "font" : this.view.fontOrImage = true ; break;
-                    case "image": this.view.fontOrImage = false; break;
+                    case "font" : this.view.settings.fontOrImage = true ; break;
+                    case "image": this.view.settings.fontOrImage = false; break;
                 }
             });
 
             $('input:radio[name="usingTile"]').change(() => {
                 const value = $('input:radio[name="usingTile"]:checked').val();
                 switch (value) {
-                    case "characters": this.view.suit = Suit.Characters; break;
-                    case "dots"      : this.view.suit = Suit.Dots      ; break;
-                    case "bomboos"   : this.view.suit = Suit.Bomboos   ; break;
+                    case "characters": this.view.settings.suit = Suit.Characters; break;
+                    case "dots"      : this.view.settings.suit = Suit.Dots      ; break;
+                    case "bomboos"   : this.view.settings.suit = Suit.Bomboos   ; break;
                 }
             });
 
             $('input:radio[name="tileSize"]').change(() => {
                 const value = $('input:radio[name="tileSize"]:checked').val();
                 switch (value) {
-                    case "small" : this.view.tileSize = TileSize.Small ; break;
-                    case "medium": this.view.tileSize = TileSize.Medium; break;
-                    case "large" : this.view.tileSize = TileSize.Large ; break;
+                    case "small" : this.view.settings.tileSize = TileSize.Small ; break;
+                    case "medium": this.view.settings.tileSize = TileSize.Medium; break;
+                    case "large" : this.view.settings.tileSize = TileSize.Large ; break;
                 }
             });
 
             $('input:radio[name="sorting"]').change(() => {
                 const value = $('input:radio[name="sorting"]:checked').val();
                 switch (value) {
-                    case "sorted"  : this.view.isSorted = true ; break;
-                    case "unsorted": this.view.isSorted = false; break;
+                    case "sorted"  : this.view.settings.isSorted = true ; break;
+                    case "unsorted": this.view.settings.isSorted = false; break;
                 }
             });
         
@@ -497,7 +606,7 @@ namespace Chiniisou {
         }
 
         private updateNextButton(): void {
-            if (this.view.isJapanese)
+            if (this.view.settings.isJapanese)
                 $('#nextButton').val(this.isQuestion ? '次の問題' : '待ちを表示');
             else
                 $('#nextButton').val(this.isQuestion ? 'Next' : 'Show winning tiles');
@@ -529,7 +638,7 @@ namespace Chiniisou {
         }
 
         private updateLanguage(): void {
-            if (this.view.isJapanese) {
+            if (this.view.settings.isJapanese) {
                 $('#title').html("麻雀 清一色の練習 | 翔ソフトウェア (Sho's)");
 
                 $('#usingTileLabel').html('牌');
