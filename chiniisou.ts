@@ -101,6 +101,8 @@ namespace Chiniisou {
         
         public constructor() {
             this.allHands      = Model.getAllHands();
+            console.log('allHands: ' + String(this.allHands.length));
+            console.log('allHands: ' + String(this.allHands));
             this.completeHands = Model.getCompleteHands(this.allHands);
         }
 
@@ -143,66 +145,93 @@ namespace Chiniisou {
         //     return hand;
         // }
 
+        private static makeHands(tileNumber: number, tileNumberSum: number, hand: number[] | null, hands: number[][]): boolean {
+            let newTileNumberSum = tileNumberSum + tileNumber;
+            if (hand == null)
+                hand = [];
+            hand.push(tileNumber);
+            if (hand.length > 9 || newTileNumberSum > Model.completeHandsNumber)
+                return false;
+            if (newTileNumberSum == Model.completeHandsNumber) {
+                while (hand.length < 9)
+                    hand.push(0);
+                hands.push(hand);
+                return true;
+            }
+            for (var tileNumber = 0; tileNumber <= 4; tileNumber++) {
+                if (!Model.makeHands(tileNumber, newTileNumberSum, hand.concat(), hands))
+                    break;
+            }
+            return true;
+        }
+
         private static getAllHands(): number[][] {
-            var hands = [];
-            for (var tileNumber1 = 0; tileNumber1 <= 4; tileNumber1++) {
-                let tileNumberSum1 = tileNumber1;
-                for (var tileNumber2 = 0; tileNumber2 <= 4; tileNumber2++) {
-                    let tileNumberSum2 = tileNumberSum1 + tileNumber2;
-                    for (var tileNumber3 = 0; tileNumber3 <= 4; tileNumber3++) {
-                        let tileNumberSum3 = tileNumberSum2 + tileNumber3;
-                        for (var tileNumber4 = 0; tileNumber4 <= 4; tileNumber4++) {
-                            let tileNumberSum4 = tileNumberSum3 + tileNumber4;
-                            if (tileNumberSum4 >= Model.completeHandsNumber) {
-                                if (tileNumberSum4 == Model.completeHandsNumber)
-                                    hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, 0, 0, 0, 0, 0]);
-                                break;
-                            }
-                            for (var tileNumber5 = 0; tileNumber5 <= 4; tileNumber5++) {
-                                let tileNumberSum5 = tileNumberSum4 + tileNumber5;
-                                if (tileNumberSum5 >= Model.completeHandsNumber) {
-                                    if (tileNumberSum5 == Model.completeHandsNumber)
-                                        hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, 0, 0, 0, 0]);
-                                    break;
-                                }
-                                for (var tileNumber6 = 0; tileNumber6 <= 4; tileNumber6++) {
-                                    let tileNumberSum6 = tileNumberSum5 + tileNumber6;
-                                    if (tileNumberSum6 >= Model.completeHandsNumber) {
-                                        if (tileNumberSum6 == Model.completeHandsNumber)
-                                            hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, 0, 0, 0]);
-                                        break;
-                                    }
-                                    for (var tileNumber7 = 0; tileNumber7 <= 4; tileNumber7++) {
-                                        let tileNumberSum7 = tileNumberSum6 + tileNumber7;
-                                        if (tileNumberSum7 >= Model.completeHandsNumber) {
-                                            if (tileNumberSum7 == Model.completeHandsNumber)
-                                                hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, tileNumber7, 0, 0]);
-                                            break;
-                                        }
-                                        for (var tileNumber8 = 0; tileNumber8 <= 4; tileNumber8++) {
-                                            let tileNumberSum8 = tileNumberSum7 + tileNumber8;
-                                            if (tileNumberSum8 >= Model.completeHandsNumber) {
-                                                if (tileNumberSum8 == Model.completeHandsNumber)
-                                                    hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, tileNumber7, tileNumber8, 0]);
-                                                break;
-                                            }
-                                            for (var tileNumber9 = 0; tileNumber9 <= 4; tileNumber9++) {
-                                                let tileNumberSum9 = tileNumberSum8 + tileNumber9;
-                                                if (tileNumberSum9 >= Model.completeHandsNumber) {
-                                                    if (tileNumberSum9 == Model.completeHandsNumber)
-                                                        hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, tileNumber7, tileNumber8, tileNumber9]);
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            var hands: number[][] = [];
+            for (var tileNumber = 0; tileNumber <= 4; tileNumber++) {
+                if (!Model.makeHands(tileNumber, 0, null, hands))
+                    break;
             }
             return hands;
+
+            // var hands = [];
+            // for (var tileNumber1 = 0; tileNumber1 <= 4; tileNumber1++) {
+            //     let tileNumberSum1 = tileNumber1;
+            //     for (var tileNumber2 = 0; tileNumber2 <= 4; tileNumber2++) {
+            //         let tileNumberSum2 = tileNumberSum1 + tileNumber2;
+            //         for (var tileNumber3 = 0; tileNumber3 <= 4; tileNumber3++) {
+            //             let tileNumberSum3 = tileNumberSum2 + tileNumber3;
+            //             for (var tileNumber4 = 0; tileNumber4 <= 4; tileNumber4++) {
+            //                 let tileNumberSum4 = tileNumberSum3 + tileNumber4;
+            //                 if (tileNumberSum4 >= Model.completeHandsNumber) {
+            //                     if (tileNumberSum4 == Model.completeHandsNumber)
+            //                         hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, 0, 0, 0, 0, 0]);
+            //                     break;
+            //                 }
+            //                 for (var tileNumber5 = 0; tileNumber5 <= 4; tileNumber5++) {
+            //                     let tileNumberSum5 = tileNumberSum4 + tileNumber5;
+            //                     if (tileNumberSum5 >= Model.completeHandsNumber) {
+            //                         if (tileNumberSum5 == Model.completeHandsNumber)
+            //                             hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, 0, 0, 0, 0]);
+            //                         break;
+            //                     }
+            //                     for (var tileNumber6 = 0; tileNumber6 <= 4; tileNumber6++) {
+            //                         let tileNumberSum6 = tileNumberSum5 + tileNumber6;
+            //                         if (tileNumberSum6 >= Model.completeHandsNumber) {
+            //                             if (tileNumberSum6 == Model.completeHandsNumber)
+            //                                 hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, 0, 0, 0]);
+            //                             break;
+            //                         }
+            //                         for (var tileNumber7 = 0; tileNumber7 <= 4; tileNumber7++) {
+            //                             let tileNumberSum7 = tileNumberSum6 + tileNumber7;
+            //                             if (tileNumberSum7 >= Model.completeHandsNumber) {
+            //                                 if (tileNumberSum7 == Model.completeHandsNumber)
+            //                                     hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, tileNumber7, 0, 0]);
+            //                                 break;
+            //                             }
+            //                             for (var tileNumber8 = 0; tileNumber8 <= 4; tileNumber8++) {
+            //                                 let tileNumberSum8 = tileNumberSum7 + tileNumber8;
+            //                                 if (tileNumberSum8 >= Model.completeHandsNumber) {
+            //                                     if (tileNumberSum8 == Model.completeHandsNumber)
+            //                                         hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, tileNumber7, tileNumber8, 0]);
+            //                                     break;
+            //                                 }
+            //                                 for (var tileNumber9 = 0; tileNumber9 <= 4; tileNumber9++) {
+            //                                     let tileNumberSum9 = tileNumberSum8 + tileNumber9;
+            //                                     if (tileNumberSum9 >= Model.completeHandsNumber) {
+            //                                         if (tileNumberSum9 == Model.completeHandsNumber)
+            //                                             hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, tileNumber7, tileNumber8, tileNumber9]);
+            //                                         break;
+            //                                     }
+            //                                 }
+            //                             }
+            //                         }
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+            // return hands;
         }
         
         private static isSevenPairs(hand: number[]): boolean {
