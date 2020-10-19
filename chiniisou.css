@@ -19,6 +19,16 @@ h2:before {
     border-bottom: solid 79px transparent;
     z-index: -2
 }
+.settings {
+    font-size: small;
+    font-weight: lighter;
+}
+
+.userInput {
+    font-size: large;
+    font-weight: bold;
+}
+
 .small-tile {
     font-size: 300%;
 }

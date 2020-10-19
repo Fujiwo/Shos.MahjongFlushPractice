@@ -94,18 +94,17 @@ var Chiniisou;
             this.allHands = Model.getAllHands();
             // console.log('allHands: ' + String(this.allHands.length));
             // console.log('allHands: ' + String(this.allHands));
-            this.completeHands = Model.getCompleteHands(this.allHands);
-            //console.log('allHands: ' + String(this.completeHands.length));
+            this.winningHands = Model.getWinningHands(this.allHands);
         }
         Model.prototype.getNewReadyToWinHand = function () {
-            var completeHand = Helper.getRandomElement(this.completeHands);
-            return Model.getReadyToWinHand(completeHand);
+            var winningHand = Helper.getRandomElement(this.winningHands);
+            return Model.getReadyToWinHand(winningHand);
         };
-        Model.makeComplateHandIndexes = function (readyToWinHand) {
+        Model.makeWinningHandIndexes = function (readyToWinHand) {
             var handIndexes = [];
-            for (var handIndex = 0; handIndex < 9; handIndex++) {
+            for (var handIndex = 0; handIndex < Model.handIndexNumber; handIndex++) {
                 var hand = Model.appendHand(readyToWinHand, handIndex);
-                if (hand !== null && Model.isCompleteHand(hand))
+                if (hand !== null && Model.isWinningHand(hand))
                     handIndexes.push(handIndex);
             }
             return handIndexes;
@@ -134,10 +133,10 @@ var Chiniisou;
             if (hand == null)
                 hand = [];
             hand.push(tileNumber);
-            if (hand.length > 9 || newTileNumberSum > Model.completeHandsNumber)
+            if (hand.length > Model.handIndexNumber || newTileNumberSum > Model.winningHandsNumber)
                 return false;
-            if (newTileNumberSum == Model.completeHandsNumber) {
-                while (hand.length < 9)
+            if (newTileNumberSum == Model.winningHandsNumber) {
+                while (hand.length < Model.handIndexNumber)
                     hand.push(0);
                 hands.push(hand);
                 return true;
@@ -164,43 +163,43 @@ var Chiniisou;
             //             let tileNumberSum3 = tileNumberSum2 + tileNumber3;
             //             for (var tileNumber4 = 0; tileNumber4 <= 4; tileNumber4++) {
             //                 let tileNumberSum4 = tileNumberSum3 + tileNumber4;
-            //                 if (tileNumberSum4 >= Model.completeHandsNumber) {
-            //                     if (tileNumberSum4 == Model.completeHandsNumber)
+            //                 if (tileNumberSum4 >= Model.winningHandsNumber) {
+            //                     if (tileNumberSum4 == Model.winningHandsNumber)
             //                         hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, 0, 0, 0, 0, 0]);
             //                     break;
             //                 }
             //                 for (var tileNumber5 = 0; tileNumber5 <= 4; tileNumber5++) {
             //                     let tileNumberSum5 = tileNumberSum4 + tileNumber5;
-            //                     if (tileNumberSum5 >= Model.completeHandsNumber) {
-            //                         if (tileNumberSum5 == Model.completeHandsNumber)
+            //                     if (tileNumberSum5 >= Model.winningHandsNumber) {
+            //                         if (tileNumberSum5 == Model.winningHandsNumber)
             //                             hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, 0, 0, 0, 0]);
             //                         break;
             //                     }
             //                     for (var tileNumber6 = 0; tileNumber6 <= 4; tileNumber6++) {
             //                         let tileNumberSum6 = tileNumberSum5 + tileNumber6;
-            //                         if (tileNumberSum6 >= Model.completeHandsNumber) {
-            //                             if (tileNumberSum6 == Model.completeHandsNumber)
+            //                         if (tileNumberSum6 >= Model.winningHandsNumber) {
+            //                             if (tileNumberSum6 == Model.winningHandsNumber)
             //                                 hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, 0, 0, 0]);
             //                             break;
             //                         }
             //                         for (var tileNumber7 = 0; tileNumber7 <= 4; tileNumber7++) {
             //                             let tileNumberSum7 = tileNumberSum6 + tileNumber7;
-            //                             if (tileNumberSum7 >= Model.completeHandsNumber) {
-            //                                 if (tileNumberSum7 == Model.completeHandsNumber)
+            //                             if (tileNumberSum7 >= Model.winningHandsNumber) {
+            //                                 if (tileNumberSum7 == Model.winningHandsNumber)
             //                                     hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, tileNumber7, 0, 0]);
             //                                 break;
             //                             }
             //                             for (var tileNumber8 = 0; tileNumber8 <= 4; tileNumber8++) {
             //                                 let tileNumberSum8 = tileNumberSum7 + tileNumber8;
-            //                                 if (tileNumberSum8 >= Model.completeHandsNumber) {
-            //                                     if (tileNumberSum8 == Model.completeHandsNumber)
+            //                                 if (tileNumberSum8 >= Model.winningHandsNumber) {
+            //                                     if (tileNumberSum8 == Model.winningHandsNumber)
             //                                         hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, tileNumber7, tileNumber8, 0]);
             //                                     break;
             //                                 }
             //                                 for (var tileNumber9 = 0; tileNumber9 <= 4; tileNumber9++) {
             //                                     let tileNumberSum9 = tileNumberSum8 + tileNumber9;
-            //                                     if (tileNumberSum9 >= Model.completeHandsNumber) {
-            //                                         if (tileNumberSum9 == Model.completeHandsNumber)
+            //                                     if (tileNumberSum9 >= Model.winningHandsNumber) {
+            //                                         if (tileNumberSum9 == Model.winningHandsNumber)
             //                                             hands.push([tileNumber1, tileNumber2, tileNumber3, tileNumber4, tileNumber5, tileNumber6, tileNumber7, tileNumber8, tileNumber9]);
             //                                         break;
             //                                     }
@@ -222,7 +221,7 @@ var Chiniisou;
             }
             return true;
         };
-        Model.maybeCompleteHand = function (hand) {
+        Model.maybeWinningHand = function (hand) {
             var a = hand[0];
             var b = hand[1];
             for (var i = 0; i < 7; i++) {
@@ -237,16 +236,16 @@ var Chiniisou;
             }
             return a % 3 == 0 && b % 3 == 0;
         };
-        Model.isCompleteHand = function (hand) {
+        Model.isWinningHand = function (hand) {
             if (Model.isSevenPairs(hand))
                 return true;
             var p = 0;
-            for (var i = 0; i < 9; i++)
+            for (var i = 0; i < Model.handIndexNumber; i++)
                 p += i * hand[i];
-            for (var i = p * 2 % 3; i < 9; i += 3) {
+            for (var i = p * 2 % 3; i < Model.handIndexNumber; i += 3) {
                 hand[i] -= 2;
                 if (hand[i] >= 0) {
-                    if (Model.maybeCompleteHand(hand)) {
+                    if (Model.maybeWinningHand(hand)) {
                         hand[i] += 2;
                         return true;
                     }
@@ -255,11 +254,11 @@ var Chiniisou;
             }
             return false;
         };
-        Model.getCompleteHands = function (allHands) {
-            return allHands.filter(function (hand) { return Model.isCompleteHand(hand); });
+        Model.getWinningHands = function (allHands) {
+            return allHands.filter(function (hand) { return Model.isWinningHand(hand); });
         };
         Model.decrementHand = function (hand) {
-            var randomIndex = Helper.getRandomIndex(Model.completeHandsNumber);
+            var randomIndex = Helper.getRandomIndex(Model.winningHandsNumber);
             var index = 0;
             for (var handIndex = 0; handIndex < hand.length; handIndex++) {
                 index += hand[handIndex];
@@ -274,8 +273,8 @@ var Chiniisou;
             }
             throw new Error('Error: decrementHand failed.');
         };
-        Model.getReadyToWinHand = function (completeHand) {
-            return Model.decrementHand(completeHand)[0];
+        Model.getReadyToWinHand = function (winningHand) {
+            return Model.decrementHand(winningHand)[0];
         };
         Model.appendHand = function (hand, handIndex) {
             var clonedHand = hand.concat();
@@ -285,7 +284,8 @@ var Chiniisou;
             }
             return null;
         };
-        Model.completeHandsNumber = 14;
+        Model.winningHandsNumber = 14;
+        Model.handIndexNumber = 9;
         return Model;
     }());
     var ViewSettings = /** @class */ (function () {
@@ -306,7 +306,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "fontOrImage", {
@@ -319,7 +319,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "suit", {
@@ -332,7 +332,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "tileSize", {
@@ -345,7 +345,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "isSorted", {
@@ -358,7 +358,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         // public constructor() {
@@ -390,7 +390,7 @@ var Chiniisou;
             get: function () {
                 return this.settings_;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         View.prototype.appendHandTo = function (element, hand) {
@@ -409,7 +409,7 @@ var Chiniisou;
                     case TileSize.Large: return "large-tile";
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(View.prototype, "tileTexts", {
@@ -420,7 +420,7 @@ var Chiniisou;
                     default: return View.charactersTileTexts;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         View.prototype.handIndexesToHtml = function (handIndexes) {
@@ -504,14 +504,14 @@ var Chiniisou;
             get: function () {
                 return this.view.settings.isJapanese ? '聴牌' : 'Ready to win hand';
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Application.prototype, "answerText", {
             get: function () {
                 return this.view.settings.isJapanese ? '待ち' : 'Winning tiles';
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Application.prototype.initializeControls = function () {
@@ -628,7 +628,7 @@ var Chiniisou;
             this.isQuestion = false;
         };
         Application.prototype.setAnswer = function () {
-            var handIndexes = Model.makeComplateHandIndexes(this.readyToWinHand);
+            var handIndexes = Model.makeWinningHandIndexes(this.readyToWinHand);
             $("#hands").append('<div>' + this.answerText + ':</div>');
             this.view.appendHandIndexesTo($("#hands"), handIndexes);
             this.isQuestion = true;
@@ -668,7 +668,7 @@ var Chiniisou;
         };
         Application.prototype.getHandIndexes = function () {
             var handIndexes = [];
-            for (var handIndex = 0; handIndex < 9; handIndex++) {
+            for (var handIndex = 0; handIndex < Model.handIndexNumber; handIndex++) {
                 if ($('#answerCheck' + String(handIndex + 1)).prop('checked'))
                     handIndexes.push(handIndex);
             }
