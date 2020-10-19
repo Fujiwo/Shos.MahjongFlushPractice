@@ -95,6 +95,7 @@ var Chiniisou;
             // console.log('allHands: ' + String(this.allHands.length));
             // console.log('allHands: ' + String(this.allHands));
             this.completeHands = Model.getCompleteHands(this.allHands);
+            //console.log('allHands: ' + String(this.completeHands.length));
         }
         Model.prototype.getNewReadyToWinHand = function () {
             var completeHand = Helper.getRandomElement(this.completeHands);
