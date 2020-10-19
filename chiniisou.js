@@ -306,7 +306,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "fontOrImage", {
@@ -319,7 +319,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "suit", {
@@ -332,7 +332,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "tileSize", {
@@ -345,7 +345,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "isSorted", {
@@ -358,7 +358,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         // public constructor() {
@@ -390,7 +390,7 @@ var Chiniisou;
             get: function () {
                 return this.settings_;
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         View.prototype.appendHandTo = function (element, hand) {
@@ -409,7 +409,7 @@ var Chiniisou;
                     case TileSize.Large: return "large-tile";
                 }
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         Object.defineProperty(View.prototype, "tileTexts", {
@@ -420,7 +420,7 @@ var Chiniisou;
                     default: return View.charactersTileTexts;
                 }
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         View.prototype.handIndexesToHtml = function (handIndexes) {
@@ -504,14 +504,14 @@ var Chiniisou;
             get: function () {
                 return this.view.settings.isJapanese ? '聴牌' : 'Ready to win hand';
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         Object.defineProperty(Application.prototype, "answerText", {
             get: function () {
                 return this.view.settings.isJapanese ? '待ち' : 'Winning tiles';
             },
-            enumerable: false,
+            enumerable: true,
             configurable: true
         });
         Application.prototype.initializeControls = function () {
@@ -679,52 +679,74 @@ var Chiniisou;
             $('#questionNumber').text(String(this.questionNumber));
         };
         Application.prototype.updateLanguage = function () {
-            if (this.view.settings.isJapanese) {
-                $('#title').html("麻雀 清一色の練習 | 翔ソフトウェア (Sho's)");
-                $('#usingTileLabel').html('牌');
-                $('label[for="usingTileCharacters"]').text('萬子');
-                $('label[for="usingTileDots"]').text('筒子');
-                $('label[for="usingTileBomboos"]').text('索子');
-                $('#tileSizeLabel').html('牌の大きさ');
-                $('label[for="tileSizeSmall"]').text('小');
-                $('label[for="tileSizeMedium"]').text('中');
-                $('label[for="tileSizeLarge"]').text('大');
-                $('#languageLabel').html('言語 (Language)');
-                $('label[for="languageEnglish"]').text('英語 (English)');
-                $('label[for="languageJapanese"]').text('日本語 (Japanese)');
-                $('#fontOrImageLabel').html('牌の描画方法 (表示がおかしいときは「画像」を選択)');
-                $('label[for="fontOrImageFont"]').text('フォント');
-                $('label[for="fontOrImageImage"]').text('画像');
-                $('#sortingLabel').html('理牌');
-                $('label[for="sortingSorted"]').text('あり');
-                $('label[for="sortingUnsorted"]').text('なし');
-                $('#answerChecksClear').val('クリア');
-                $('#winsNumberLabel').html('正解数');
-                $('#answerPanel').html('何待ち?');
-            }
-            else {
-                $('#title').html("Mahjong Flush Practice | Sho's Software");
-                $('#languageLabel').html('Language (言語)');
-                $('label[for="languageEnglish"]').text('English (英語)');
-                $('label[for="languageJapanese"]').text('Japanese (日本語)');
-                $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, choose "Images.")');
-                $('label[for="fontOrImageFont"]').text('Font');
-                $('label[for="fontOrImageImage"]').text('Images');
-                $('#usingTileLabel').html('Tiles');
-                $('label[for="usingTileCharacters"]').text('Characters');
-                $('label[for="usingTileDots"]').text('Dots');
-                $('label[for="usingTileBomboos"]').text('Bomboos');
-                $('#tileSizeLabel').html('Tile size');
-                $('label[for="tileSizeSmall"]').text('Small');
-                $('label[for="tileSizeMedium"]').text('Medium');
-                $('label[for="tileSizeLarge"]').text('Large');
-                $('#sortingLabel').html('Sorting');
-                $('label[for="sortingSorted"]').text('Sorted');
-                $('label[for="sortingUnsorted"]').text('Unsorted');
-                $('#answerChecksClear').val('Clear');
-                $('#winsNumberLabel').html('Correct Answers');
-                $('#answerPanel').html('Winning tiles?');
-            }
+            var isJapanese = this.view.settings.isJapanese;
+            //     $('#title').html();
+            $('#title').html(isJapanese ? "麻雀 清一色の練習 | 翔ソフトウェア (Sho's)" : "Mahjong Flush Practice | Sho's Software");
+            $('#languageLabel').html(isJapanese ? '言語 (Language)' : 'Language (言語)');
+            $('label[for="languageEnglish"]').text(isJapanese ? '英語 (English)' : 'English (英語)');
+            $('label[for="languageJapanese"]').text(isJapanese ? '日本語 (Japanese)' : 'Japanese (日本語)');
+            $('#fontOrImageLabel').html(isJapanese ? '牌の描画方法 (表示がおかしいときは「画像」を選択)' : 'How to draw the tiles (If the display is not correct, choose "Images.")');
+            $('label[for="fontOrImageFont"]').text(isJapanese ? 'フォント' : 'Font');
+            $('label[for="fontOrImageImage"]').text(isJapanese ? '画像' : 'Images');
+            $('#usingTileLabel').html(isJapanese ? '牌' : 'Tiles');
+            $('label[for="usingTileCharacters"]').text(isJapanese ? '萬子' : 'Characters');
+            $('label[for="usingTileDots"]').text(isJapanese ? '筒子' : 'Dots');
+            $('label[for="usingTileBomboos"]').text(isJapanese ? '索子' : 'Bomboos');
+            $('#tileSizeLabel').html(isJapanese ? '牌の大きさ' : 'Tile size');
+            $('label[for="tileSizeSmall"]').text(isJapanese ? '小' : 'Small');
+            $('label[for="tileSizeMedium"]').text(isJapanese ? '中' : 'Medium');
+            $('label[for="tileSizeLarge"]').text(isJapanese ? '大' : 'Large');
+            $('#sortingLabel').html(isJapanese ? '理牌' : 'Sorting');
+            $('label[for="sortingSorted"]').text(isJapanese ? 'あり' : 'Sorted');
+            $('label[for="sortingUnsorted"]').text(isJapanese ? 'なし' : 'Unsorted');
+            $('#answerChecksClear').val(isJapanese ? 'クリア' : 'Clear');
+            $('#winsNumberLabel').html(isJapanese ? '正解数' : 'Correct Answers');
+            $('#answerPanel').html(isJapanese ? '何待ち?' : 'Winning tiles?');
+            // if (this.view.settings.isJapanese) {
+            //     $('#title').html("麻雀 清一色の練習 | 翔ソフトウェア (Sho's)");
+            //     $('#usingTileLabel').html('牌');
+            //     $('label[for="usingTileCharacters"]').text('萬子');
+            //     $('label[for="usingTileDots"]').text('筒子');
+            //     $('label[for="usingTileBomboos"]').text('索子');
+            //     $('#tileSizeLabel').html('牌の大きさ');
+            //     $('label[for="tileSizeSmall"]').text('小');
+            //     $('label[for="tileSizeMedium"]').text('中');
+            //     $('label[for="tileSizeLarge"]').text('大');
+            //     $('#languageLabel').html('言語 (Language)');
+            //     $('label[for="languageEnglish"]').text('英語 (English)');
+            //     $('label[for="languageJapanese"]').text('日本語 (Japanese)');
+            //     $('#fontOrImageLabel').html('牌の描画方法 (表示がおかしいときは「画像」を選択)');
+            //     $('label[for="fontOrImageFont"]').text('フォント');
+            //     $('label[for="fontOrImageImage"]').text('画像');
+            //     $('#sortingLabel').html('理牌');
+            //     $('label[for="sortingSorted"]').text('あり');
+            //     $('label[for="sortingUnsorted"]').text('なし');
+            //     $('#answerChecksClear').val('クリア');
+            //     $('#winsNumberLabel').html('正解数');
+            //     $('#answerPanel').html('何待ち?');
+            // } else {
+            //     $('#title').html("Mahjong Flush Practice | Sho's Software");
+            //     $('#languageLabel').html('Language (言語)');
+            //     $('label[for="languageEnglish"]').text('English (英語)');
+            //     $('label[for="languageJapanese"]').text('Japanese (日本語)');
+            //     $('#fontOrImageLabel').html('How to draw the tiles (If the display is not correct, choose "Images.")');
+            //     $('label[for="fontOrImageFont"]').text('Font');
+            //     $('label[for="fontOrImageImage"]').text('Images');
+            //     $('#usingTileLabel').html('Tiles');
+            //     $('label[for="usingTileCharacters"]').text('Characters');
+            //     $('label[for="usingTileDots"]').text('Dots');
+            //     $('label[for="usingTileBomboos"]').text('Bomboos');
+            //     $('#tileSizeLabel').html('Tile size');
+            //     $('label[for="tileSizeSmall"]').text('Small');
+            //     $('label[for="tileSizeMedium"]').text('Medium');
+            //     $('label[for="tileSizeLarge"]').text('Large');
+            //     $('#sortingLabel').html('Sorting');
+            //     $('label[for="sortingSorted"]').text('Sorted');
+            //     $('label[for="sortingUnsorted"]').text('Unsorted');
+            //     $('#answerChecksClear').val('Clear');
+            //     $('#winsNumberLabel').html('Correct Answers');
+            //     $('#answerPanel').html('Winning tiles?');
+            // }
             this.updateQandA();
         };
         return Application;
