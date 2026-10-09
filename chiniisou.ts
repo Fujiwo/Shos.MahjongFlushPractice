@@ -1,7 +1,7 @@
 namespace Chiniisou {
     enum Suit {
         Characters,
-        Bomboos   ,
+        Bamboos   ,
         Dots
     }
         
@@ -17,27 +17,25 @@ namespace Chiniisou {
             return language != null && language.substr(0, 2) === 'ja';
         }
 
+        // localStorage may be missing, or may throw (e.g. storage blocked, quota exceeded, corrupted data).
         public static save(key: string, data: any): boolean {
-            if (typeof window.localStorage !== 'undefined') {
-                // console.log('Helper.save()');
-                // console.log(data);
-                // console.log(JSON.stringify(data));
+            try {
+                if (typeof window.localStorage === 'undefined')
+                    return false;
                 window.localStorage.setItem(key, JSON.stringify(data));
                 return true;
-            } else {
+            } catch (error) {
                 return false;
             }
         }
             
         public static load(key: string): any | null {
-            if (typeof window.localStorage !== 'undefined') {
+            try {
+                if (typeof window.localStorage === 'undefined')
+                    return null;
                 const json = window.localStorage.getItem(key);
-                // console.log('Helper.load()');
-                // console.log(json);
-                // if (json != null)
-                //     console.log(JSON.parse(json));
                 return json == null ? null : JSON.parse(json);
-            } else {
+            } catch (error) {
                 return null;
             }
         }
@@ -381,14 +379,24 @@ namespace Chiniisou {
 
         public load(): boolean {
             const loadedData = Helper.load(ViewSettings.dataKey);
-            if (loadedData == null)
+            if (loadedData == null || typeof loadedData !== 'object')
                 return false;
-            this._isJapanese  = loadedData._isJapanese ;
-            this._fontOrImage = loadedData._fontOrImage;
-            this._suit        = loadedData._suit       ;
-            this._tileSize    = loadedData._tileSize   ;
-            this._isSorted    = loadedData._isSorted   ;
+            // Ignore missing or invalid values and keep the defaults for them.
+            if (typeof loadedData._isJapanese  === 'boolean')
+                this._isJapanese  = loadedData._isJapanese ;
+            if (typeof loadedData._fontOrImage === 'boolean')
+                this._fontOrImage = loadedData._fontOrImage;
+            if (ViewSettings.isEnumValue(Suit, loadedData._suit))
+                this._suit        = loadedData._suit       ;
+            if (ViewSettings.isEnumValue(TileSize, loadedData._tileSize))
+                this._tileSize    = loadedData._tileSize   ;
+            if (typeof loadedData._isSorted    === 'boolean')
+                this._isSorted    = loadedData._isSorted   ;
             return true;
+        }
+
+        private static isEnumValue(enumObject: any, value: any): boolean {
+            return typeof value === 'number' && typeof enumObject[value] === 'string';
         }
 
         private save(): boolean {
@@ -412,7 +420,7 @@ namespace Chiniisou {
         }
 
         public appendHandTo(element: JQuery<HTMLElement>, hand: number[]): void {
-            const div = this.settings.isSorted ? this.handToTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
+            const div = this.handToTileHtml(hand);
             element.append(div);
         }
         
@@ -431,7 +439,7 @@ namespace Chiniisou {
 
         private get tileTexts(): string[] {
             switch (this.settings.suit) {
-                case Suit.Bomboos: return View.bambooTileTexts    ;
+                case Suit.Bamboos: return View.bambooTileTexts    ;
                 case Suit.Dots   : return View.dotsTileTexts      ;
                 default          : return View.charactersTileTexts;
             }
@@ -447,7 +455,7 @@ namespace Chiniisou {
         private handToTileHtml(hand: number[]): JQuery<HTMLElement> {
             let div = $('<div>');
             div.addClass(this.tileStyle);
-            hand.forEach((tileNumber, handIndex, self) => {
+            hand.forEach((tileNumber, handIndex) => {
                 for (var count = 0; count < tileNumber; count++)
                     div.append(this.handIndexToHtml(handIndex));
             });
@@ -483,7 +491,7 @@ namespace Chiniisou {
             switch (this.settings.suit) {
                 case Suit.Characters: fileName += 'm'; break;
                 case Suit.Dots      : fileName += 'p'; break;
-                case Suit.Bomboos   : fileName += 's'; break;
+                case Suit.Bamboos   : fileName += 's'; break;
             }
             return fileName + 's' + String(handIndex + 1) + '_1.gif';
         }
@@ -493,12 +501,17 @@ namespace Chiniisou {
         model         : Model    = new Model();
         view          : View     = new View();
 
-        isQuestion    : boolean  = true;
-        readyToWinHand: number[] = [];
-        questionNumber: number   = 0;
-        winsNumber    : number   = 0;
+        readyToWinHand        : number[]        = [];
+        shuffledHandIndexes   : number[]        = [];   // display order of readyToWinHand when unsorted
+        winningHandIndexes    : number[] | null = null; // null while the answer is not shown
+        questionNumber        : number          = 0;
+        winsNumber            : number          = 0;
 
-        private get qustionText(): string {
+        private get isAnswerShown(): boolean {
+            return this.winningHandIndexes !== null;
+        }
+
+        private get questionText(): string {
             return this.view.settings.isJapanese ? '聴牌' : 'Ready to win hand';
         }
 
@@ -510,9 +523,6 @@ namespace Chiniisou {
             this.initializeControls();
             this.setHandlers();
             this.setQuestion();
-
-            this.view.settings.isJapanese ? $('input:radio[name="language"]').val(['japanese'])
-                                          : $('input:radio[name="language"]').val(['english' ]);
             this.updateLanguage();
         }
 
@@ -525,7 +535,7 @@ namespace Chiniisou {
             switch (this.view.settings.suit) {
                 case Suit.Characters: suitValue = "characters"; break;
                 case Suit.Dots      : suitValue = "dots"      ; break;
-                case Suit.Bomboos   : suitValue = "bomboos"   ; break;
+                case Suit.Bamboos   : suitValue = "bamboos"   ; break;
             }
             //console.log("suitValue: " + suitValue);
             $('input:radio[name="usingTile"]').val([suitValue]);
@@ -558,6 +568,7 @@ namespace Chiniisou {
                     case "font" : this.view.settings.fontOrImage = true ; break;
                     case "image": this.view.settings.fontOrImage = false; break;
                 }
+                this.render();
             });
 
             $('input:radio[name="usingTile"]').change(() => {
@@ -565,8 +576,9 @@ namespace Chiniisou {
                 switch (value) {
                     case "characters": this.view.settings.suit = Suit.Characters; break;
                     case "dots"      : this.view.settings.suit = Suit.Dots      ; break;
-                    case "bomboos"   : this.view.settings.suit = Suit.Bomboos   ; break;
+                    case "bamboos"   : this.view.settings.suit = Suit.Bamboos   ; break;
                 }
+                this.render();
             });
 
             $('input:radio[name="tileSize"]').change(() => {
@@ -576,6 +588,7 @@ namespace Chiniisou {
                     case "medium": this.view.settings.tileSize = TileSize.Medium; break;
                     case "large" : this.view.settings.tileSize = TileSize.Large ; break;
                 }
+                this.render();
             });
 
             $('input:radio[name="sorting"]').change(() => {
@@ -584,11 +597,12 @@ namespace Chiniisou {
                     case "sorted"  : this.view.settings.isSorted = true ; break;
                     case "unsorted": this.view.settings.isSorted = false; break;
                 }
+                this.render();
             });
         
             $('#nextButton').on('click', () => {
-                this.isQuestion ? this.setQuestion()
-                                : this.setAnswer  ();
+                this.isAnswerShown ? this.setQuestion()
+                                   : this.setAnswer  ();
                 this.updateQandA();
             });
 
@@ -598,23 +612,34 @@ namespace Chiniisou {
         }
 
         private setQuestion(): void {
-            this.readyToWinHand = this.model.getNewReadyToWinHand();
-
-            $("#hands").html("");
-            $("#hands").append('<div>' + this.qustionText + ':</div>');
-            this.view.appendHandTo($("#hands"), this.readyToWinHand);
-
-            this.isQuestion = false;
+            this.readyToWinHand      = this.model.getNewReadyToWinHand();
+            this.shuffledHandIndexes = Model.shuffledHandIndexes(this.readyToWinHand);
+            this.winningHandIndexes  = null;
+            this.render();
         }
 
         private setAnswer(): void {
             const handIndexes = Model.makeWinningHandIndexes(this.readyToWinHand);
-
-            $("#hands").append('<div>' + this.answerText + ':</div>');
-            this.view.appendHandIndexesTo($("#hands"), handIndexes);
-
-            this.isQuestion = true;
+            this.winningHandIndexes = handIndexes;
+            this.render();
             this.judge(handIndexes);
+        }
+
+        // Redraws the question (and the answer if shown) with the current settings.
+        private render(): void {
+            const hands = $("#hands");
+            hands.empty();
+
+            hands.append($('<div>').text(this.questionText + ':'));
+            if (this.view.settings.isSorted)
+                this.view.appendHandTo       (hands, this.readyToWinHand     );
+            else
+                this.view.appendHandIndexesTo(hands, this.shuffledHandIndexes);
+
+            if (this.winningHandIndexes !== null) {
+                hands.append($('<div>').text(this.answerText + ':'));
+                this.view.appendHandIndexesTo(hands, this.winningHandIndexes);
+            }
         }
 
         private judge(correctHandIndexes: number[]) {
@@ -637,13 +662,13 @@ namespace Chiniisou {
 
         private updateNextButton(): void {
             if (this.view.settings.isJapanese)
-                $('#nextButton').val(this.isQuestion ? '次の問題' : '待ちを表示');
+                $('#nextButton').val(this.isAnswerShown ? '次の問題' : '待ちを表示');
             else
-                $('#nextButton').val(this.isQuestion ? 'Next' : 'Show winning tiles');
+                $('#nextButton').val(this.isAnswerShown ? 'Next' : 'Show winning tiles');
         }
 
         private updateAnswerChecks(): void {
-            if (this.isQuestion) {
+            if (this.isAnswerShown) {
                 $('input[name="answerCheck"]').prop('disabled', true);
                 $('#answerChecksClear'       ).prop('disabled', true);
             } else {
@@ -669,6 +694,7 @@ namespace Chiniisou {
 
         private updateLanguage(): void {
             const isJapanese = this.view.settings.isJapanese;
+            $('html').attr('lang', isJapanese ? 'ja' : 'en');
             //     $('#title').html();
 
 
@@ -685,7 +711,7 @@ namespace Chiniisou {
             $('#usingTileLabel').html(isJapanese ? '牌' : 'Tiles');
             $('label[for="usingTileCharacters"]').text(isJapanese ? '萬子' : 'Characters');
             $('label[for="usingTileDots"]'      ).text(isJapanese ? '筒子' : 'Dots'      );
-            $('label[for="usingTileBomboos"]'   ).text(isJapanese ? '索子' : 'Bomboos'   );
+            $('label[for="usingTileBamboos"]'   ).text(isJapanese ? '索子' : 'Bamboos'   );
 
             $('#tileSizeLabel').html(isJapanese ? '牌の大きさ' : 'Tile size');
             $('label[for="tileSizeSmall"]' ).text(isJapanese ? '小' : 'Small' );
@@ -706,7 +732,7 @@ namespace Chiniisou {
             //     $('#usingTileLabel').html('牌');
             //     $('label[for="usingTileCharacters"]').text('萬子');
             //     $('label[for="usingTileDots"]').text('筒子');
-            //     $('label[for="usingTileBomboos"]').text('索子');
+            //     $('label[for="usingTileBamboos"]').text('索子');
 
             //     $('#tileSizeLabel').html('牌の大きさ');
             //     $('label[for="tileSizeSmall"]').text('小');
@@ -742,7 +768,7 @@ namespace Chiniisou {
             //     $('#usingTileLabel').html('Tiles');
             //     $('label[for="usingTileCharacters"]').text('Characters');
             //     $('label[for="usingTileDots"]').text('Dots');
-            //     $('label[for="usingTileBomboos"]').text('Bomboos');
+            //     $('label[for="usingTileBamboos"]').text('Bamboos');
 
             //     $('#tileSizeLabel').html('Tile size');
             //     $('label[for="tileSizeSmall"]').text('Small');
@@ -758,6 +784,7 @@ namespace Chiniisou {
             //     $('#answerPanel').html('Winning tiles?');
             // }
             this.updateQandA();
+            this.render();
         }
    }
 }

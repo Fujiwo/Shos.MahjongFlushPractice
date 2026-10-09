@@ -8,22 +8,22 @@ Mahjong Flush Practice (麻雀 清一色の練習) — a single-page browser app
 
 ## Build / Run
 
-- Source of truth is `chiniisou.ts`. TypeScript is **not** a project dependency (`node_modules` holds only `@types/jquery` and `@types/sizzle`), so compile with a global `tsc` or `npx -p typescript tsc` — plain `npx tsc` would fetch the unrelated npm package `tsc`. With `tsconfig.json` (ES5 target, `strict`, source maps) it produces `chiniisou.js` + `chiniisou.js.map`. The VS Code task "tsc: ビルド - tsconfig.json" does the same.
-- **`chiniisou.html` loads `chiniisou.min.js` and `chiniisou.min.css`, not the unminified files.** There is no minify script in the repo; after changing `chiniisou.ts` or `chiniisou.css`, the `.min.*` files must be regenerated (e.g. with terser / a CSS minifier) or the page will not reflect the change.
+- `npm install`, then `npm run build`: `tsc` (ES5 target, `strict`, source maps, `skipLibCheck` — needed because `@types/jquery`'s ES5 `Iterable<T>` shim conflicts with TypeScript 5.6+) → `chiniisou.js`, then terser → `chiniisou.min.js` and clean-css → `chiniisou.min.css`. `npm run build:ts` / `build:min` run the halves.
+- **`chiniisou.html` loads `chiniisou.min.js` and `chiniisou.min.css`, not the unminified files**, so always run the full build after changing `chiniisou.ts` or `chiniisou.css`. Generated `.js`/`.min.*`/`.map` files are committed.
 - No bundler, no module system: `chiniisou.ts` is a global `namespace Chiniisou` script. jQuery 3.5.1 and Bootstrap 4.5 come from CDNs in the HTML; `@types/jquery` is the only dependency actually used for typing.
 - Run by serving the repo root over HTTP and opening `chiniisou.html` (`.vscode/launch.json` expects `http://localhost:8080`), e.g. `npx http-server -p 8080`.
-- No tests or linter. `package.json` is a leftover copied from another project (Shos.Boids — webpack/three/babel entries are unused); don't rely on its scripts.
+- No tests or linter.
 
 ## Architecture (all in `chiniisou.ts`)
 
 - **Hand representation**: a hand is `number[9]` of tile counts per rank (index 0–8 = 1–9 of one suit). "Hand indexes" is the expanded list of ranks (e.g. `[0,0,1,2,...]`) used for display/shuffling. `Model.handToHandIndexes` converts between them.
 - **`Model`**: on construction, enumerates every 14-tile count vector with 0–4 of each rank (`getAllHands` via recursive `makeHands`) and filters to winning hands. A question is a random winning hand with one random tile removed (`getReadyToWinHand`). Answers come from `makeWinningHandIndexes`, which tries adding each rank (`appendHand` rejects a 5th copy) and checks `isWinningHand`.
 - **`isWinningHand`** accepts seven pairs (七対子, `isSevenPairs`) or 4 sets + 1 pair. For the latter it uses a compact trick: the pair's rank must satisfy `rank ≡ 2·Σ(rank·count) (mod 3)`, and `maybeWinningHand` greedily checks the rest decomposes into sets. It temporarily mutates `hand` and restores it before returning, so keep that symmetry when editing.
-- **`ViewSettings`**: language, font-vs-image tiles, suit, tile size, sorted/unsorted. Each setter persists the whole object to `localStorage` under key `ShosChiniisouViewSettings`; `load()` reads the `_`-prefixed fields back, so renaming those fields breaks saved settings.
+- **`ViewSettings`**: language, font-vs-image tiles, suit, tile size, sorted/unsorted. Each setter persists the whole object to `localStorage` under key `ShosChiniisouViewSettings`; `load()` reads the `_`-prefixed fields back (validating each and keeping defaults for bad values), so renaming those fields breaks saved settings. Storage errors are swallowed in `Helper.save`/`load`.
 - **`View`**: renders tiles either as Unicode mahjong characters (U+1F007–) or GIF images `images/p_{m|p|s}s{1-9}_1.gif` (47×63 scaled by tile size).
-- **`Application`**: wires jQuery handlers to the HTML controls (radio groups `language`, font/image, suit, size, sorting; answer checkboxes; next button), toggles between question and answer state, tracks question/correct counts, and does all UI localization in `updateLanguage()` by setting text on element IDs/labels in `chiniisou.html`. New UI text must be added there for both Japanese and English. Entry point: `$(document).ready(() => new Chiniisou.Application())`.
+- **`Application`**: wires jQuery handlers to the HTML controls (radio groups `language`, `fontOrImage`, `usingTile`, `tileSize`, `sorting`; answer checkboxes; next button) and tracks question/correct counts. State is `readyToWinHand`, its fixed `shuffledHandIndexes` (display order when unsorted), and `winningHandIndexes` (`null` until the answer is shown; `isAnswerShown` derives from it). `render()` rebuilds `#hands` from that state and is called after every settings change, so display settings apply immediately. It also does all UI localization in `updateLanguage()` by setting text on element IDs/labels in `chiniisou.html`. New UI text must be added there for both Japanese and English. Entry point: `$(document).ready(() => new Chiniisou.Application())`.
 
 ## Notes
 
 - The UI is bilingual (Japanese/English, defaulting to the browser language); keep both strings in sync. Code comments are in English, and many are commented-out debug code.
-- `.vs/` and `node_modules/@types` are committed; working-tree diffs on them are typically line-ending noise only.
+- The repository stores LF (`.gitattributes`: `* text=auto`); working copies may be CRLF. `.vs/` and `node_modules/` are git-ignored.

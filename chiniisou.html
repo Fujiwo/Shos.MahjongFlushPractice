@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -20,11 +20,10 @@
         <img src="../css/image/line.jpg" width="100%" height="1" alt="LINE">
     </p>
 
-    <p class="small">
-        <script type="text/javascript">
-            document.write("Last updated on " + document.lastModified + ".")
-        </script>
-    </p>
+    <p class="small" id="lastUpdated"></p>
+    <script type="text/javascript">
+        document.getElementById("lastUpdated").textContent = "Last updated on " + document.lastModified + ".";
+    </script>
     <h2 id="title"></h2>
 
     <div class="container">
@@ -67,8 +66,8 @@
                         <label class="form-check-label" for="usingTileDots"></label>
                     </div>
                     <div class="form-check  form-check-inline">
-                        <input class="form-check-input" id="usingTileBomboos" type="radio" name="usingTile" value="bomboos">
-                        <label class="form-check-label" for="usingTileBomboos"></label>
+                        <input class="form-check-input" id="usingTileBamboos" type="radio" name="usingTile" value="bamboos">
+                        <label class="form-check-label" for="usingTileBamboos"></label>
                     </div>
                 </div>
             </div>

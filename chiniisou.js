@@ -4,7 +4,7 @@ var Chiniisou;
     var Suit;
     (function (Suit) {
         Suit[Suit["Characters"] = 0] = "Characters";
-        Suit[Suit["Bomboos"] = 1] = "Bomboos";
+        Suit[Suit["Bamboos"] = 1] = "Bamboos";
         Suit[Suit["Dots"] = 2] = "Dots";
     })(Suit || (Suit = {}));
     var TileSize;
@@ -20,28 +20,26 @@ var Chiniisou;
             var language = (window.navigator.languages && window.navigator.languages[0]) || window.navigator.language;
             return language != null && language.substr(0, 2) === 'ja';
         };
+        // localStorage may be missing, or may throw (e.g. storage blocked, quota exceeded, corrupted data).
         Helper.save = function (key, data) {
-            if (typeof window.localStorage !== 'undefined') {
-                // console.log('Helper.save()');
-                // console.log(data);
-                // console.log(JSON.stringify(data));
+            try {
+                if (typeof window.localStorage === 'undefined')
+                    return false;
                 window.localStorage.setItem(key, JSON.stringify(data));
                 return true;
             }
-            else {
+            catch (error) {
                 return false;
             }
         };
         Helper.load = function (key) {
-            if (typeof window.localStorage !== 'undefined') {
+            try {
+                if (typeof window.localStorage === 'undefined')
+                    return null;
                 var json = window.localStorage.getItem(key);
-                // console.log('Helper.load()');
-                // console.log(json);
-                // if (json != null)
-                //     console.log(JSON.parse(json));
                 return json == null ? null : JSON.parse(json);
             }
-            else {
+            catch (error) {
                 return null;
             }
         };
@@ -306,7 +304,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "fontOrImage", {
@@ -319,7 +317,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "suit", {
@@ -332,7 +330,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "tileSize", {
@@ -345,7 +343,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(ViewSettings.prototype, "isSorted", {
@@ -358,7 +356,7 @@ var Chiniisou;
                     this.save();
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         // public constructor() {
@@ -366,14 +364,23 @@ var Chiniisou;
         // }
         ViewSettings.prototype.load = function () {
             var loadedData = Helper.load(ViewSettings.dataKey);
-            if (loadedData == null)
+            if (loadedData == null || typeof loadedData !== 'object')
                 return false;
-            this._isJapanese = loadedData._isJapanese;
-            this._fontOrImage = loadedData._fontOrImage;
-            this._suit = loadedData._suit;
-            this._tileSize = loadedData._tileSize;
-            this._isSorted = loadedData._isSorted;
+            // Ignore missing or invalid values and keep the defaults for them.
+            if (typeof loadedData._isJapanese === 'boolean')
+                this._isJapanese = loadedData._isJapanese;
+            if (typeof loadedData._fontOrImage === 'boolean')
+                this._fontOrImage = loadedData._fontOrImage;
+            if (ViewSettings.isEnumValue(Suit, loadedData._suit))
+                this._suit = loadedData._suit;
+            if (ViewSettings.isEnumValue(TileSize, loadedData._tileSize))
+                this._tileSize = loadedData._tileSize;
+            if (typeof loadedData._isSorted === 'boolean')
+                this._isSorted = loadedData._isSorted;
             return true;
+        };
+        ViewSettings.isEnumValue = function (enumObject, value) {
+            return typeof value === 'number' && typeof enumObject[value] === 'string';
         };
         ViewSettings.prototype.save = function () {
             return Helper.save(ViewSettings.dataKey, this);
@@ -390,11 +397,11 @@ var Chiniisou;
             get: function () {
                 return this.settings_;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         View.prototype.appendHandTo = function (element, hand) {
-            var div = this.settings.isSorted ? this.handToTileHtml(hand) : this.handIndexesToHtml(Model.shuffledHandIndexes(hand));
+            var div = this.handToTileHtml(hand);
             element.append(div);
         };
         View.prototype.appendHandIndexesTo = function (element, handIndexes) {
@@ -409,18 +416,18 @@ var Chiniisou;
                     case TileSize.Large: return "large-tile";
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(View.prototype, "tileTexts", {
             get: function () {
                 switch (this.settings.suit) {
-                    case Suit.Bomboos: return View.bambooTileTexts;
+                    case Suit.Bamboos: return View.bambooTileTexts;
                     case Suit.Dots: return View.dotsTileTexts;
                     default: return View.charactersTileTexts;
                 }
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         View.prototype.handIndexesToHtml = function (handIndexes) {
@@ -434,7 +441,7 @@ var Chiniisou;
             var _this = this;
             var div = $('<div>');
             div.addClass(this.tileStyle);
-            hand.forEach(function (tileNumber, handIndex, self) {
+            hand.forEach(function (tileNumber, handIndex) {
                 for (var count = 0; count < tileNumber; count++)
                     div.append(_this.handIndexToHtml(handIndex));
             });
@@ -474,7 +481,7 @@ var Chiniisou;
                 case Suit.Dots:
                     fileName += 'p';
                     break;
-                case Suit.Bomboos:
+                case Suit.Bamboos:
                     fileName += 's';
                     break;
             }
@@ -489,29 +496,35 @@ var Chiniisou;
         function Application() {
             this.model = new Model();
             this.view = new View();
-            this.isQuestion = true;
             this.readyToWinHand = [];
+            this.shuffledHandIndexes = []; // display order of readyToWinHand when unsorted
+            this.winningHandIndexes = null; // null while the answer is not shown
             this.questionNumber = 0;
             this.winsNumber = 0;
             this.initializeControls();
             this.setHandlers();
             this.setQuestion();
-            this.view.settings.isJapanese ? $('input:radio[name="language"]').val(['japanese'])
-                : $('input:radio[name="language"]').val(['english']);
             this.updateLanguage();
         }
-        Object.defineProperty(Application.prototype, "qustionText", {
+        Object.defineProperty(Application.prototype, "isAnswerShown", {
+            get: function () {
+                return this.winningHandIndexes !== null;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "questionText", {
             get: function () {
                 return this.view.settings.isJapanese ? '聴牌' : 'Ready to win hand';
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Object.defineProperty(Application.prototype, "answerText", {
             get: function () {
                 return this.view.settings.isJapanese ? '待ち' : 'Winning tiles';
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         Application.prototype.initializeControls = function () {
@@ -525,8 +538,8 @@ var Chiniisou;
                 case Suit.Dots:
                     suitValue = "dots";
                     break;
-                case Suit.Bomboos:
-                    suitValue = "bomboos";
+                case Suit.Bamboos:
+                    suitValue = "bamboos";
                     break;
             }
             //console.log("suitValue: " + suitValue);
@@ -571,6 +584,7 @@ var Chiniisou;
                         _this.view.settings.fontOrImage = false;
                         break;
                 }
+                _this.render();
             });
             $('input:radio[name="usingTile"]').change(function () {
                 var value = $('input:radio[name="usingTile"]:checked').val();
@@ -581,10 +595,11 @@ var Chiniisou;
                     case "dots":
                         _this.view.settings.suit = Suit.Dots;
                         break;
-                    case "bomboos":
-                        _this.view.settings.suit = Suit.Bomboos;
+                    case "bamboos":
+                        _this.view.settings.suit = Suit.Bamboos;
                         break;
                 }
+                _this.render();
             });
             $('input:radio[name="tileSize"]').change(function () {
                 var value = $('input:radio[name="tileSize"]:checked').val();
@@ -599,6 +614,7 @@ var Chiniisou;
                         _this.view.settings.tileSize = TileSize.Large;
                         break;
                 }
+                _this.render();
             });
             $('input:radio[name="sorting"]').change(function () {
                 var value = $('input:radio[name="sorting"]:checked').val();
@@ -610,9 +626,10 @@ var Chiniisou;
                         _this.view.settings.isSorted = false;
                         break;
                 }
+                _this.render();
             });
             $('#nextButton').on('click', function () {
-                _this.isQuestion ? _this.setQuestion()
+                _this.isAnswerShown ? _this.setQuestion()
                     : _this.setAnswer();
                 _this.updateQandA();
             });
@@ -622,17 +639,29 @@ var Chiniisou;
         };
         Application.prototype.setQuestion = function () {
             this.readyToWinHand = this.model.getNewReadyToWinHand();
-            $("#hands").html("");
-            $("#hands").append('<div>' + this.qustionText + ':</div>');
-            this.view.appendHandTo($("#hands"), this.readyToWinHand);
-            this.isQuestion = false;
+            this.shuffledHandIndexes = Model.shuffledHandIndexes(this.readyToWinHand);
+            this.winningHandIndexes = null;
+            this.render();
         };
         Application.prototype.setAnswer = function () {
             var handIndexes = Model.makeWinningHandIndexes(this.readyToWinHand);
-            $("#hands").append('<div>' + this.answerText + ':</div>');
-            this.view.appendHandIndexesTo($("#hands"), handIndexes);
-            this.isQuestion = true;
+            this.winningHandIndexes = handIndexes;
+            this.render();
             this.judge(handIndexes);
+        };
+        // Redraws the question (and the answer if shown) with the current settings.
+        Application.prototype.render = function () {
+            var hands = $("#hands");
+            hands.empty();
+            hands.append($('<div>').text(this.questionText + ':'));
+            if (this.view.settings.isSorted)
+                this.view.appendHandTo(hands, this.readyToWinHand);
+            else
+                this.view.appendHandIndexesTo(hands, this.shuffledHandIndexes);
+            if (this.winningHandIndexes !== null) {
+                hands.append($('<div>').text(this.answerText + ':'));
+                this.view.appendHandIndexesTo(hands, this.winningHandIndexes);
+            }
         };
         Application.prototype.judge = function (correctHandIndexes) {
             var usersAnswerHandIndexes = this.getHandIndexes();
@@ -651,12 +680,12 @@ var Chiniisou;
         };
         Application.prototype.updateNextButton = function () {
             if (this.view.settings.isJapanese)
-                $('#nextButton').val(this.isQuestion ? '次の問題' : '待ちを表示');
+                $('#nextButton').val(this.isAnswerShown ? '次の問題' : '待ちを表示');
             else
-                $('#nextButton').val(this.isQuestion ? 'Next' : 'Show winning tiles');
+                $('#nextButton').val(this.isAnswerShown ? 'Next' : 'Show winning tiles');
         };
         Application.prototype.updateAnswerChecks = function () {
-            if (this.isQuestion) {
+            if (this.isAnswerShown) {
                 $('input[name="answerCheck"]').prop('disabled', true);
                 $('#answerChecksClear').prop('disabled', true);
             }
@@ -680,6 +709,7 @@ var Chiniisou;
         };
         Application.prototype.updateLanguage = function () {
             var isJapanese = this.view.settings.isJapanese;
+            $('html').attr('lang', isJapanese ? 'ja' : 'en');
             //     $('#title').html();
             $('#title').html(isJapanese ? "麻雀 清一色の練習 | 翔ソフトウェア (Sho's)" : "Mahjong Flush Practice | Sho's Software");
             $('#languageLabel').html(isJapanese ? '言語 (Language)' : 'Language (言語)');
@@ -691,7 +721,7 @@ var Chiniisou;
             $('#usingTileLabel').html(isJapanese ? '牌' : 'Tiles');
             $('label[for="usingTileCharacters"]').text(isJapanese ? '萬子' : 'Characters');
             $('label[for="usingTileDots"]').text(isJapanese ? '筒子' : 'Dots');
-            $('label[for="usingTileBomboos"]').text(isJapanese ? '索子' : 'Bomboos');
+            $('label[for="usingTileBamboos"]').text(isJapanese ? '索子' : 'Bamboos');
             $('#tileSizeLabel').html(isJapanese ? '牌の大きさ' : 'Tile size');
             $('label[for="tileSizeSmall"]').text(isJapanese ? '小' : 'Small');
             $('label[for="tileSizeMedium"]').text(isJapanese ? '中' : 'Medium');
@@ -707,7 +737,7 @@ var Chiniisou;
             //     $('#usingTileLabel').html('牌');
             //     $('label[for="usingTileCharacters"]').text('萬子');
             //     $('label[for="usingTileDots"]').text('筒子');
-            //     $('label[for="usingTileBomboos"]').text('索子');
+            //     $('label[for="usingTileBamboos"]').text('索子');
             //     $('#tileSizeLabel').html('牌の大きさ');
             //     $('label[for="tileSizeSmall"]').text('小');
             //     $('label[for="tileSizeMedium"]').text('中');
@@ -735,7 +765,7 @@ var Chiniisou;
             //     $('#usingTileLabel').html('Tiles');
             //     $('label[for="usingTileCharacters"]').text('Characters');
             //     $('label[for="usingTileDots"]').text('Dots');
-            //     $('label[for="usingTileBomboos"]').text('Bomboos');
+            //     $('label[for="usingTileBamboos"]').text('Bamboos');
             //     $('#tileSizeLabel').html('Tile size');
             //     $('label[for="tileSizeSmall"]').text('Small');
             //     $('label[for="tileSizeMedium"]').text('Medium');
@@ -748,6 +778,7 @@ var Chiniisou;
             //     $('#answerPanel').html('Winning tiles?');
             // }
             this.updateQandA();
+            this.render();
         };
         return Application;
     }());

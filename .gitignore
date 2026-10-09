@@ -1,0 +1,6 @@
+# Visual Studio / IDE
+.vs/
+.idea/
+
+# npm
+node_modules/
